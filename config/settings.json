@@ -5,19 +5,22 @@
   "api_version": "v26.0",
   "ai_generated_label": true,
   "location_id": null,
-
   "tts_voice": "es-CL-CatalinaNeural",
   "tts_rate": "+6%",
   "music_volume": 0.12,
-
-  "groq_models": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"],
-  "gemini_models": ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"],
-
+  "groq_models": [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant"
+  ],
+  "gemini_models": [
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite"
+  ],
   "publishing": {
     "max_posts_per_run": 2,
     "max_late_hours": 20
   },
-
   "inbox": {
     "posts_to_scan": 12,
     "comment_max_age_days": 7,
@@ -26,13 +29,24 @@
     "min_delay_seconds": 3,
     "max_delay_seconds": 9
   },
-
   "weekly_plan": {
     "reel": 4,
     "carousel": 2,
     "image": 1,
     "story": 7,
-    "post_times": ["13:00", "20:30"],
+    "post_times": [
+      "13:00",
+      "20:30"
+    ],
     "story_time": "11:00"
+  },
+  "openai_images": {
+    "model": "gpt-image-1.5",
+    "fallback_models": [
+      "gpt-image-1",
+      "gpt-image-1-mini"
+    ],
+    "quality": "medium",
+    "max_per_run": 40
   }
 }

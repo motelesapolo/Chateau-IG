@@ -22,7 +22,10 @@ Formato (lo escribe Claude en el lote semanal):
 }
 
 Fuentes de `visual`:
-  pollinations   {"prompt": "...", "seed": 7}             imagen IA gratis
+  ia             {"prompt": "...", "quality": "high"}     imagen IA: OpenAI si hay OPENAI_API_KEY, si no Pollinations
+  pollinations   {"prompt": "...", "seed": 7}             igual que "ia" (nombre antiguo); "engine": "pollinations" fuerza la gratis
+                 Prompts de IA: en inglés, fotográficos y concretos (luz, encuadre, lente, materiales).
+                 Nunca para mostrar las habitaciones o el hotel: eso SOLO con "file" (material real).
   pixabay_photo  {"query": "..."}  pixabay_video {"query": "..."}   stock gratis (PIXABAY_KEY)
   pexels_photo   {"query": "..."}  pexels_video  {"query": "..."}   stock gratis (PEXELS_KEY)
   card           {"bg": "#101820", "bg2": "#2b5876"}      fondo de color/degradado para frases
@@ -39,7 +42,7 @@ from pathlib import Path
 from . import config
 
 TYPES = {"reel", "image", "carousel", "story"}
-SOURCES = {"pollinations", "pixabay_photo", "pixabay_video", "pexels_photo", "pexels_video",
+SOURCES = {"ia", "pollinations", "pixabay_photo", "pixabay_video", "pexels_photo", "pexels_video",
            "card", "file"}
 STATUSES = {"planned", "rendered", "render_failed", "published", "publish_failed",
             "missed", "cancelled"}
@@ -133,8 +136,8 @@ def validate(item: dict) -> list[str]:
         if src not in SOURCES:
             errs.append(f"escena {i}: visual.source debe ser uno de {sorted(SOURCES)}")
             continue
-        if src == "pollinations" and not vis.get("prompt"):
-            errs.append(f"escena {i}: pollinations necesita prompt")
+        if src in {"ia", "pollinations"} and not vis.get("prompt"):
+            errs.append(f"escena {i}: {src} necesita prompt")
         if src.startswith(("pixabay", "pexels")) and not vis.get("query"):
             errs.append(f"escena {i}: {src} necesita query")
         if src == "file":

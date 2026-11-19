@@ -50,9 +50,13 @@ Reglas de calidad:
 - **Imágenes:** una idea fuerte, texto corto encima o ninguno.
 - **Historias (1 diaria):** avisos del post del día, preguntas, detrás de escena. Imagen con texto corto.
 - **Visuales:**
-  - `pollinations`: escribe el `prompt` en **inglés**, detallado (sujeto, estilo, luz, encuadre vertical),
-    y mantén un estilo coherente toda la semana. Nada de personas reales, logos, marcas ni personajes
-    con derechos de autor.
+  - `ia` (imagen IA; usa OpenAI si está la clave, si no Pollinations): `prompt` en **inglés** escrito como
+    foto de revista: sujeto concreto, materiales, luz (warm tungsten, candlelight, golden hour), lente
+    (35mm, shallow depth of field), encuadre vertical, paleta (deep burgundy, warm gold, soft cream).
+    Misma paleta toda la semana para que el perfil se vea coherente. Solo ambientes y detalles genéricos
+    (velas, copas, sábanas, vapor, ciudad de noche); **nunca** para representar el hotel o sus habitaciones.
+    Nada de personas reales, logos, marcas, texto dentro de la imagen ni nada sugerente.
+    `"quality": "high"` solo para la portada o el gancho del reel más importante de la semana.
   - `pixabay_video` / `pixabay_photo` (si existe la clave): `query` corto en inglés.
   - `card`: para frases y listas.
   - `file` con `"path": "material/..."`: fotos y videos reales del hotel (obligatorio para mostrar habitaciones).

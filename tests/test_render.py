@@ -73,3 +73,47 @@ def test_text_overlay_wraps_long_text(project):
                                 "sin salirse de los bordes de la imagen", render.VERTICAL)
     box = layer.getbbox()
     assert box[0] > 40 and box[2] < 1040
+
+
+class _Resp:
+    def __init__(self, status, payload=None, text=""):
+        self.status_code, self._p, self.text = status, payload, text or str(payload)
+
+    def json(self):
+        return self._p
+
+
+def _jpeg_b64(w=1024, h=1536):
+    import base64
+    from io import BytesIO
+    from PIL import Image
+    buf = BytesIO()
+    Image.new("RGB", (w, h), (200, 120, 60)).save(buf, "JPEG")
+    return base64.b64encode(buf.getvalue()).decode()
+
+
+def test_openai_falls_back_to_next_model_and_fits_size(tmp_path, monkeypatch):
+    from autopilot import render
+    monkeypatch.setenv("OPENAI_API_KEY", "x")
+    monkeypatch.setattr(render, "_openai_count", 0)
+    calls = []
+
+    class S:
+        def post(self, url, headers, json, timeout):
+            calls.append(json["model"])
+            if json["model"] == "gpt-image-1.5":
+                return _Resp(404, text="The model gpt-image-1.5 does not exist")
+            return _Resp(200, {"data": [{"b64_json": _jpeg_b64()}]})
+
+    out = render._openai({"prompt": "warm cozy light"}, render.VERTICAL, tmp_path / "a.jpg", session=S())
+    from PIL import Image
+    assert calls == ["gpt-image-1.5", "gpt-image-1"]
+    assert Image.open(out).size == render.VERTICAL
+
+
+def test_ai_image_uses_pollinations_when_openai_fails(tmp_path, monkeypatch):
+    from autopilot import render
+    monkeypatch.setenv("OPENAI_API_KEY", "x")
+    monkeypatch.setattr(render, "_openai", lambda *a, **k: (_ for _ in ()).throw(render.RenderError("sin saldo")))
+    monkeypatch.setattr(render, "_pollinations", lambda vis, size, dest, seed: dest)
+    assert render.ai_image({"prompt": "p"}, render.FEED, tmp_path / "b.jpg", 1) == tmp_path / "b.jpg"

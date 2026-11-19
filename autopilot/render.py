@@ -4,8 +4,8 @@
 - Reels e historias de video: MP4 H.264/AAC 1080x1920, 30 fps, < 19 MB.
 - Historias de imagen: JPG 1080x1920.
 
-Todo es gratis: imágenes IA de Pollinations, stock de Pixabay/Pexels, voz de edge-tts,
-y el montaje con ffmpeg + Pillow.
+Imágenes IA: OpenAI (gpt-image) si existe el secreto OPENAI_API_KEY; si no, o si falla, Pollinations (gratis).
+Stock de Pixabay/Pexels, voz de edge-tts y montaje con ffmpeg + Pillow.
 """
 from __future__ import annotations
 
@@ -39,6 +39,9 @@ MAX_VIDEO_MB = 19.0
 UA = {"User-Agent": "ig-autopilot/1.0 (+https://github.com)"}
 
 _last_pollinations = 0.0
+_openai_count = 0
+OPENAI_DEFAULTS = {"model": "gpt-image-1.5", "fallback_models": ["gpt-image-1", "gpt-image-1-mini"],
+                   "quality": "medium", "max_per_run": 40}
 
 
 class RenderError(RuntimeError):
@@ -116,6 +119,49 @@ def _pollinations(vis: dict, size: tuple[int, int], dest: Path, seed: int) -> Pa
     raise RenderError(f"Pollinations no generó la imagen: {last}")
 
 
+def _openai(vis: dict, size: tuple[int, int], dest: Path, session=None) -> Path:
+    """Genera con la API de imágenes de OpenAI y recorta al tamaño de Instagram."""
+    global _openai_count
+    cfg = {**OPENAI_DEFAULTS, **(config.load_settings().get("openai_images") or {})}
+    if _openai_count >= int(cfg["max_per_run"]):
+        raise RenderError("Tope de imágenes OpenAI por ejecución alcanzado")
+    http = session or requests
+    headers = {"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"}
+    portrait = size[1] > size[0]
+    last = None
+    for model in [cfg["model"], *cfg["fallback_models"]]:
+        body = {"model": model, "prompt": vis["prompt"], "n": 1, "quality": vis.get("quality", cfg["quality"]),
+                "size": "1024x1536" if portrait else "1024x1024", "output_format": "jpeg"}
+        r = http.post("https://api.openai.com/v1/images/generations", headers=headers, json=body, timeout=300)
+        if r.status_code in (400, 404) and "model" in r.text.lower() and "prompt" not in r.text.lower():
+            last = f"{model}: {r.status_code}"
+            continue  # modelo no disponible para esta cuenta: probar el siguiente
+        if r.status_code >= 400:
+            raise RenderError(f"OpenAI respondió {r.status_code}: {r.text[:300]}")
+        data = r.json()["data"][0]
+        if data.get("b64_json"):
+            import base64
+            raw = base64.b64decode(data["b64_json"])
+        else:
+            raw = http.get(data["url"], timeout=120).content
+        _openai_count += 1
+        img = Image.open(BytesIO(raw)).convert("RGB")
+        ImageOps.fit(img, size, Image.LANCZOS).save(dest, quality=95)
+        log.info("Imagen IA generada con OpenAI (%s)", model)
+        return dest
+    raise RenderError(f"Ningún modelo de OpenAI disponible ({last})")
+
+
+def ai_image(vis: dict, size: tuple[int, int], dest: Path, seed: int) -> Path:
+    """OpenAI si hay clave (mejor calidad); si no hay o falla, Pollinations."""
+    if os.environ.get("OPENAI_API_KEY") and vis.get("engine", "auto") != "pollinations":
+        try:
+            return _openai(vis, size, dest)
+        except Exception as exc:  # noqa: BLE001
+            log.warning("OpenAI no generó la imagen (%s); se usa Pollinations", exc)
+    return _pollinations(vis, size, dest, seed)
+
+
 def _pick(items: list, seed: int):
     if not items:
         return None
@@ -187,8 +233,8 @@ def _card(vis: dict, size: tuple[int, int], dest: Path) -> Path:
 def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int) -> tuple[Path, str]:
     """Descarga/genera el visual. Devuelve (ruta, 'image'|'video')."""
     src = vis["source"]
-    if src == "pollinations":
-        return _pollinations(vis, size, workdir / f"ai_{seed}.jpg", seed), "image"
+    if src in {"pollinations", "ia"}:
+        return ai_image(vis, size, workdir / f"ai_{seed}.jpg", seed), "image"
     if src in {"pixabay_photo", "pixabay_video"}:
         kind = src.split("_")[1]
         return _pixabay(vis, kind, workdir, seed), "image" if kind == "photo" else "video"
