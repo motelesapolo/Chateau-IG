@@ -10,6 +10,7 @@
   "music_volume": 0.12,
 
   "groq_models": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"],
+  "gemini_models": ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"],
 
   "publishing": {
     "max_posts_per_run": 2,

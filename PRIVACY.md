@@ -6,8 +6,9 @@ usando la API oficial de Instagram (Meta).
 **Qué datos usa:** el contenido publicado por la propia cuenta, sus métricas, y los comentarios y
 mensajes directos que otras personas envían a la cuenta, únicamente para leerlos y responderlos.
 
-**Cómo los usa:** los comentarios y mensajes se procesan con un modelo de lenguaje para redactar
-una respuesta. No se venden, no se comparten con terceros con fines publicitarios y no se usan para
+**Cómo los usa:** los comentarios y mensajes se procesan con un modelo de lenguaje de un proveedor
+externo (Google Gemini) para redactar una respuesta. Antes de enviarlos se eliminan nombres de usuario,
+teléfonos, correos y enlaces. El proveedor puede usar ese texto anonimizado según sus propios términos. No se venden, no se comparten con terceros con fines publicitarios y no se usan para
 otro propósito.
 
 **Qué se guarda:** solo identificadores técnicos (IDs) de los comentarios y mensajes ya atendidos,

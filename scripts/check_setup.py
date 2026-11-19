@@ -10,7 +10,7 @@ import requests
 import _boot
 from autopilot import config
 from autopilot.api import InstagramError, client_from_env
-from autopilot.llm import GroqLLM
+from autopilot.llm import llm_from_env
 
 
 def main() -> int:
@@ -50,15 +50,15 @@ def main() -> int:
     else:
         mark(False, "Falta el secreto IG_ACCESS_TOKEN")
 
-    if os.environ.get("GROQ_API_KEY"):
+    if os.environ.get("GROQ_API_KEY") or os.environ.get("GEMINI_API_KEY"):
         try:
-            GroqLLM(os.environ["GROQ_API_KEY"], settings.get("groq_models", [])).json_chat(
-                "Responde en JSON.", 'Devuelve {"ok": true}')
-            mark(True, "Groq responde")
+            llm = llm_from_env(settings)
+            out = llm.json_chat("Responde solo con JSON.", 'Devuelve exactamente {"ok": true}')
+            mark(bool(out.get("ok")), f"IA de la bandeja responde ({llm.provider})")
         except Exception as exc:  # noqa: BLE001
-            mark(False, f"Groq no responde: {type(exc).__name__}")
+            mark(False, f"La IA de la bandeja no responde: {type(exc).__name__}: {str(exc)[:120]}")
     else:
-        mark(False, "Falta el secreto GROQ_API_KEY")
+        mark(False, "Falta el secreto GEMINI_API_KEY (o GROQ_API_KEY)")
 
     if os.environ.get("PIXABAY_KEY"):
         r = requests.get("https://pixabay.com/api/", params={"key": os.environ["PIXABAY_KEY"], "q": "cafe",

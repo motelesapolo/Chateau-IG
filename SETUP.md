@@ -8,7 +8,7 @@ y que Claude alimenta cada semana. **Costo: $0** (solo el plan de Claude que ya 
 | 1 | Cuenta de Instagram profesional (Empresa) | La cuenta que se va a manejar | Gratis |
 | 2 | App de Meta con "Unified login" | Permiso oficial para publicar y responder | Gratis |
 | 3 | Cuenta de GitHub + este repo (público) | Donde viven el código, la cola y los robots | Gratis |
-| 4 | Clave de Groq (+ Pixabay opcional) | IA que responde la bandeja / stock | Gratis |
+| 4 | Clave de Gemini (+ Pixabay opcional) | IA que responde la bandeja / stock | Gratis |
 | 5 | Tarea semanal en Claude Code | Claude crea el contenido cada domingo | Incluido |
 
 > 🔒 **Nunca pegues tokens ni claves en un chat.** Siempre van en GitHub → Secrets (paso 6).
@@ -47,7 +47,11 @@ No necesita página de Facebook, pero sí un **portfolio comercial** (gratis).
 3. Dile a Claude el nombre del repo: él lo conecta y sube todos los archivos.
 
 ## Paso 4 · Claves gratis (10 min)
-- **Groq (obligatoria):** console.groq.com → API Keys → Create API Key.
+- **IA de la bandeja (obligatoria, una de las dos):**
+  - **Gemini:** aistudio.google.com/apikey → *Create API key* → secreto `GEMINI_API_KEY`.
+    En el plan gratis Google puede usar los textos para mejorar sus productos: por eso el sistema
+    borra usuarios, teléfonos, correos y enlaces antes de enviarlos. Con facturación activada (centavos al mes) no se usan.
+  - **Groq** (si te deja registrarte): console.groq.com → API Keys → secreto `GROQ_API_KEY`.
 - **Pixabay (opcional, stock):** pixabay.com/api/docs con la sesión iniciada → tu `key`.
 - **Pollinations (opcional, más imágenes IA sin límites):** auth.pollinations.ai → token.
 
@@ -63,7 +67,7 @@ Mientras quede algún `[COMPLETAR]`, la bandeja y el lote semanal no se ejecutan
 
 | Secreto | Valor |
 |---|---|
-| `GROQ_API_KEY` | clave de Groq |
+| `GEMINI_API_KEY` | clave de Gemini (o `GROQ_API_KEY` si usas Groq) |
 | `PIXABAY_KEY` | (opcional) |
 | `POLLINATIONS_TOKEN` | (opcional) |
 

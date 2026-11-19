@@ -10,7 +10,7 @@ Claude crea el contenido una vez por semana; GitHub Actions hace el resto.
 | Planificar y escribir la semana (`queue/*.json`) | Claude, con `/lote-semanal` | Domingo |
 | Incorporar la cola + renderizar imágenes/videos | Action `render.yml` | Al subir una rama `claude/**` |
 | Publicar a la hora indicada | Action `publish.yml` | Cada 15 min |
-| Responder comentarios y DMs (Groq, gratis) | Action `inbox.yml` | Cada hora |
+| Responder comentarios y DMs (Gemini o Groq; textos anonimizados) | Action `inbox.yml` | Cada hora |
 | Informe con métricas (`reports/`) | Action `report.yml` | Domingo 18:00 Chile |
 | Revisar que todo siga conectado (avisa por correo si falla) | Action `check.yml` | Lunes |
 

@@ -21,6 +21,20 @@ log = logging.getLogger(__name__)
 
 ACTIONS = {"reply", "skip", "hide", "flag", "crisis"}
 
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+URL_RE = re.compile(r"(?:https?://|www\.)\S+", re.IGNORECASE)
+PHONE_RE = re.compile(r"\+?\d[\d\s().-]{6,}\d")
+HANDLE_RE = re.compile(r"(?<![\w])@[\w.]{2,30}")
+
+
+def redact(text: str) -> str:
+    """Quita datos que identifican a la persona antes de enviar el texto a la IA externa."""
+    text = EMAIL_RE.sub("[correo]", text or "")
+    text = URL_RE.sub("[enlace]", text)
+    text = PHONE_RE.sub("[número]", text)
+    return HANDLE_RE.sub("[usuario]", text)
+
+
 CRISIS_RE = re.compile(
     r"suicid|matarme|me quiero morir|quiero morir|quitarme la vida|no quiero vivir|"
     r"hacerme da[nñ]o|autolesi|cortarme|kill myself|want to die|self.?harm",
@@ -179,9 +193,8 @@ class Inbox:
     def handle_comments(self) -> None:
         limit = self.cfg.get("max_comment_replies_per_run", 15)
         for media, com in self.comment_candidates()[:limit]:
-            author = (com.get("from") or {}).get("username") or com.get("username") or "alguien"
             prompt = (f"Publicación: {str(media.get('caption') or '')[:600]}\n\n"
-                      f"Comentario de @{author}: {com.get('text', '')}")
+                      f"Comentario de un cliente: {redact(com.get('text', ''))}")
             decision = self._decide("comment", prompt, com.get("text", ""), allow_hide=True)
             self._apply_comment(com, decision)
 
@@ -258,8 +271,8 @@ class Inbox:
             for m in reversed(msgs):
                 frm = m.get("from") or {}
                 mine = str(frm.get("id")) == me_id or (frm.get("username") or "").lower() == me_name
-                lines.append(f"{'Tú' if mine else '@' + str(frm.get('username', 'usuario'))}: "
-                             f"{m.get('message') or '[adjunto]'}")
+                lines.append(f"{'Tú' if mine else 'Cliente'}: "
+                             f"{redact(m.get('message') or '') or '[adjunto]'}")
             prompt = "Conversación (de la más antigua a la más reciente):\n" + "\n".join(lines[-10:])
             decision = self._decide("dm", prompt, text, allow_hide=False)
             action = decision["action"]
