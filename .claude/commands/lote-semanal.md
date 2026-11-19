@@ -53,6 +53,11 @@ Reglas de calidad:
   - **Prioridad:** 1) `material/listos/` (se publica tal cual) · 2) fotos y videos propios de `material/`
     (videos con `keep_audio: true` y sin `duration` si se usan completos) · 3) tarjetas `card` con la paleta
     de `config/marca.md` (`bg`: rojo/beige/arena, `logo: true`) · 4) IA solo si falta material de ambiente.
+  - **Retoque de fotos propias:** todas llevan retoque local suave (automático). En la foto más importante de
+    cada reel, carrusel e historia agrega `"ia_edit": "luz"` (la API mejora luz y color sin cambiar nada más).
+    En comida, tragos y detalles de `servicios/` u `otros/` puedes usar `"ia_edit": "fondo"` o una instrucción
+    libre en inglés. En `habitaciones/` y `espacios/` SOLO "luz". Al revisar las vistas previas compara con la
+    original: si la IA cambió algo además de la luz (muebles, cuadros, tamaño), quita `ia_edit` con `"replace": true`.
   - Portadas: si hay una que calce en `material/portadas/`, úsala con `"cover"`. Si falta, anota en el resumen
     qué portadas conviene que el dueño haga (tema y texto sugerido).
   - Cierra cada reel con una tarjeta roja con el logo al centro (`"logo": true, "logo_position": "center"`, 2 s).

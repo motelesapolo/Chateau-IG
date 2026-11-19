@@ -36,6 +36,11 @@ Fuentes de `visual`:
                  Colores: rojo, crema, beige, arena, dorado, cafe (o #hex). "logo": true pone el logo arriba
                  ("logo_position": "top" | "center" | "bottom"). Sobre fondo claro el texto va en rojo.
   file           {"path": "material/habitaciones/jacuzzi/foto.jpg"}  foto o video real del hotel
+                 Fotos: "retoque": "suave" (por defecto, local y gratis) | "fuerte" | "no".
+                 "ia_edit": retoque con la API de OpenAI (si hay OPENAI_API_KEY; si falla, queda el local):
+                   "luz"   → solo luz y color, conserva todo lo demás. Se puede usar en habitaciones.
+                   "fondo" → cambia solo el fondo (comida, tragos, productos). NO en habitaciones/espacios.
+                   "<instrucción libre en inglés>" → solo fuera de material/habitaciones y material/espacios.
                  (también sirve assets/...). Para mostrar habitaciones SIEMPRE material propio.
 """
 from __future__ import annotations
@@ -176,6 +181,12 @@ def validate(item: dict) -> list[str]:
             p = config.ROOT / str(vis.get("path", ""))
             if not p.is_file():
                 errs.append(f"escena {i}: no existe el archivo {vis.get('path')}")
+            mode = vis.get("ia_edit")
+            if mode and mode != "luz" and str(vis.get("path", "")).startswith(("material/habitaciones", "material/espacios")):
+                errs.append(f"escena {i}: en habitaciones y espacios solo se permite ia_edit 'luz' "
+                            "(no se altera lo que el cliente va a ver)")
+            if vis.get("retoque", "suave") not in {"suave", "fuerte", "no", False}:
+                errs.append(f"escena {i}: retoque debe ser suave, fuerte o no")
         if src.endswith("_video") and t in {"image", "carousel"}:
             errs.append(f"escena {i}: un {t} no puede usar video")
         if len(scene.get("text", "")) > 140:

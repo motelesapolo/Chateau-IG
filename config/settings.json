@@ -41,10 +41,16 @@
     "story_time": "11:00"
   },
   "openai_images": {
-    "model": "gpt-image-1.5",
+    "model": "gpt-image-2",
     "fallback_models": [
+      "gpt-image-1.5",
       "gpt-image-1",
       "gpt-image-1-mini"
+    ],
+    "edit_models": [
+      "gpt-image-2",
+      "gpt-image-1.5",
+      "gpt-image-1"
     ],
     "quality": "medium",
     "max_per_run": 40

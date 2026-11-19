@@ -30,7 +30,12 @@ y **borra los metadatos** (ubicación GPS, modelo del celular). No hace falta pr
 - Videos cortos de 5 a 15 segundos, moviendo el celular lento. Mejor varios clips cortos que uno largo.
 - Habitaciones ordenadas y limpias: cama hecha, toallas dobladas, sin objetos personales.
 
-## Si editas las fotos con ChatGPT u otra IA
+## No hace falta editarlas
+Sube las fotos tal como salen del celular. El sistema las retoca solo: un retoque suave a todas y, si está
+activada la API de ChatGPT, un retoque profesional de luz y color en las principales (sin cambiar nada de la
+habitación). En comida y tragos también puede cambiar el fondo por uno con los colores de la marca.
+
+## Si igual las editas con ChatGPT u otra IA
 Mejorar luz, color y nitidez está perfecto. **No** agregues ni quites cosas de las habitaciones
 (muebles, jacuzzi, vista, decoración) ni las hagas ver más grandes: el cliente tiene que encontrar
 lo mismo que vio. Revisa que la IA no haya cambiado detalles sin querer (cuadros, lámparas, cortinas).

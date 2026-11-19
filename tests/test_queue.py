@@ -72,3 +72,11 @@ def test_max_five_hashtags(project):
     bad = item(caption="Hola #a #b #c #d #e #f")
     assert q.validate(ok) == []
     assert any("máximo 5 hashtags" in e for e in q.validate(bad))
+
+
+def test_ia_edit_only_light_on_rooms():
+    room = sorted((q.config.ROOT / "material/habitaciones").rglob("*.jpg"))[0].relative_to(q.config.ROOT).as_posix()
+    ok = item(type="image", scenes=[{"visual": {"source": "file", "path": room, "ia_edit": "luz"}}])
+    bad = item(type="image", scenes=[{"visual": {"source": "file", "path": room, "ia_edit": "fondo"}}])
+    assert q.validate(ok) == []
+    assert any("solo se permite ia_edit 'luz'" in e for e in q.validate(bad))

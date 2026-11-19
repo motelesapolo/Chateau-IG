@@ -101,13 +101,13 @@ def test_openai_falls_back_to_next_model_and_fits_size(tmp_path, monkeypatch):
     class S:
         def post(self, url, headers, json, timeout):
             calls.append(json["model"])
-            if json["model"] == "gpt-image-1.5":
-                return _Resp(404, text="The model gpt-image-1.5 does not exist")
+            if json["model"] == "gpt-image-2":
+                return _Resp(404, text="The model gpt-image-2 does not exist")
             return _Resp(200, {"data": [{"b64_json": _jpeg_b64()}]})
 
     out = render._openai({"prompt": "warm cozy light"}, render.VERTICAL, tmp_path / "a.jpg", session=S())
     from PIL import Image
-    assert calls == ["gpt-image-1.5", "gpt-image-1"]
+    assert calls == ["gpt-image-2", "gpt-image-1.5"]
     assert Image.open(out).size == render.VERTICAL
 
 
@@ -131,3 +131,41 @@ def test_brand_overlay_draws_title_and_subtext():
     from autopilot import render
     layer = render.text_overlay("Promo 6x3", render.VERTICAL, subtext="Pagas 3 y te quedas 6")
     assert layer.getbbox() is not None
+
+
+
+def test_retouch_keeps_size_and_warms():
+    from PIL import Image
+    from autopilot import render
+    img = Image.new("RGB", (400, 300), (120, 120, 120))
+    out = render.retouch(img, "suave")
+    assert out.size == img.size
+    r, g, b = out.getpixel((200, 150))
+    assert r >= b
+
+
+def test_edit_rules_protect_rooms():
+    from autopilot import render
+    assert render.edit_allowed("material/habitaciones/vip/a.jpg", "luz")
+    assert not render.edit_allowed("material/habitaciones/vip/a.jpg", "fondo")
+    assert not render.edit_allowed("material/espacios/fachada.jpg", "libre")
+    assert render.edit_allowed("material/servicios/pizza.jpg", "fondo")
+
+
+def test_openai_edit_sends_high_fidelity(tmp_path, monkeypatch):
+    from PIL import Image
+    from autopilot import render
+    monkeypatch.setenv("OPENAI_API_KEY", "x")
+    monkeypatch.setattr(render, "_openai_count", 0)
+    src = tmp_path / "in.jpg"
+    Image.new("RGB", (800, 1000), (90, 60, 40)).save(src)
+    sent = {}
+
+    class S:
+        def post(self, url, headers, data, files, timeout):
+            sent.update(data=data, url=url)
+            return _Resp(200, {"data": [{"b64_json": _jpeg_b64()}]})
+
+    out = render._openai_edit(src, render.EDIT_PRESETS["luz"], tmp_path / "out.jpg", True, session=S())
+    assert out.exists() and sent["url"].endswith("/images/edits")
+    assert sent["data"]["input_fidelity"] == "high" and "ONLY light and color" in sent["data"]["prompt"]

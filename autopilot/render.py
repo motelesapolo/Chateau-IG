@@ -40,8 +40,25 @@ UA = {"User-Agent": "ig-autopilot/1.0 (+https://github.com)"}
 
 _last_pollinations = 0.0
 _openai_count = 0
-OPENAI_DEFAULTS = {"model": "gpt-image-1.5", "fallback_models": ["gpt-image-1", "gpt-image-1-mini"],
+OPENAI_DEFAULTS = {"model": "gpt-image-2", "fallback_models": ["gpt-image-1.5", "gpt-image-1", "gpt-image-1-mini"],
+                   "edit_models": ["gpt-image-2", "gpt-image-1.5", "gpt-image-1"],
                    "quality": "medium", "max_per_run": 40}
+
+# Retoque con IA de fotos REALES. "luz" se puede usar en cualquier foto (incluidas habitaciones);
+# "fondo" y las instrucciones libres solo fuera de habitaciones/espacios (no se altera lo que el cliente va a ver).
+PRESERVE = ("Keep everything else exactly the same: every object, furniture, bed, bathtub, walls, artwork, "
+            "curtains, lamps, materials, textures, proportions, room size, layout and camera angle. "
+            "Do not add, remove, move or resize anything. No people, no text, no logos.")
+EDIT_PRESETS = {
+    "luz": ("Retouch this real hotel photo like a professional hotel photographer: correct exposure and white "
+            "balance, warm inviting tungsten tone, recover shadows and highlights, gentle contrast and clarity, "
+            "subtle sharpening. Change ONLY light and color. " + PRESERVE),
+    "fondo": ("Keep the main subject (food, drink or product) pixel-identical in shape, portion, color and "
+              "plating. Replace only the background and surface with an elegant warm setting in deep burgundy, "
+              "cream and muted gold tones with soft candlelight bokeh. Professional food photography lighting. "
+              "No people, no text, no logos."),
+}
+PROTECTED_DIRS = ("material/habitaciones", "material/espacios")
 
 
 class RenderError(RuntimeError):
@@ -160,6 +177,81 @@ def _openai(vis: dict, size: tuple[int, int], dest: Path, session=None) -> Path:
     raise RenderError(f"Ningún modelo de OpenAI disponible ({last})")
 
 
+def retouch(img: Image.Image, level: str = "suave") -> Image.Image:
+    """Retoque local, gratis y fiel: niveles, calidez, color y nitidez. No cambia el contenido."""
+    from PIL import ImageEnhance, ImageFilter
+    if level in (False, "no", "none", None):
+        return img
+    strong = level == "fuerte"
+    img = ImageOps.autocontrast(img.convert("RGB"), cutoff=0.6 if strong else 0.3, preserve_tone=True)
+    r, g, b = img.split()
+    warm = 1.04 if strong else 1.025
+    r = r.point(lambda v: min(255, int(v * warm)))
+    b = b.point(lambda v: int(v / warm))
+    img = Image.merge("RGB", (r, g, b))
+    img = ImageEnhance.Color(img).enhance(1.10 if strong else 1.05)
+    img = ImageEnhance.Contrast(img).enhance(1.06 if strong else 1.03)
+    return img.filter(ImageFilter.UnsharpMask(radius=1.4, percent=70 if strong else 50, threshold=2))
+
+
+def edit_allowed(path: str, mode: str) -> bool:
+    return mode == "luz" or not str(path).startswith(PROTECTED_DIRS)
+
+
+def _openai_edit(src: Path, instruction: str, dest: Path, portrait: bool, session=None) -> Path:
+    """Edita una foto real con la API de imágenes de OpenAI (alta fidelidad a la original)."""
+    global _openai_count
+    cfg = {**OPENAI_DEFAULTS, **(config.load_settings().get("openai_images") or {})}
+    if _openai_count >= int(cfg["max_per_run"]):
+        raise RenderError("Tope de imágenes OpenAI por ejecución alcanzado")
+    http = session or requests
+    buf = BytesIO()
+    im = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
+    im.thumbnail((2048, 2048))
+    im.save(buf, "JPEG", quality=92)
+    last = None
+    for model in cfg["edit_models"]:
+        data = {"model": model, "prompt": instruction, "n": "1", "quality": "high", "input_fidelity": "high",
+                "size": "1024x1536" if portrait else "1024x1024", "output_format": "jpeg"}
+        r = http.post("https://api.openai.com/v1/images/edits",
+                      headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
+                      data=data, files={"image[]": ("foto.jpg", buf.getvalue(), "image/jpeg")}, timeout=300)
+        if r.status_code in (400, 404) and "model" in r.text.lower() and "prompt" not in r.text.lower():
+            last = f"{model}: {r.status_code}"
+            continue
+        if r.status_code >= 400:
+            raise RenderError(f"OpenAI (edición) respondió {r.status_code}: {r.text[:300]}")
+        import base64
+        out = r.json()["data"][0]
+        raw = base64.b64decode(out["b64_json"]) if out.get("b64_json") else http.get(out["url"], timeout=120).content
+        _openai_count += 1
+        Image.open(BytesIO(raw)).convert("RGB").save(dest, quality=95)
+        log.info("Foto retocada con OpenAI (%s)", model)
+        return dest
+    raise RenderError(f"Ningún modelo de edición disponible ({last})")
+
+
+def prepare_photo(vis: dict, size: tuple[int, int], workdir: Path, seed: int) -> Path:
+    """Foto propia: retoque con IA si se pidió (y hay clave) + retoque local suave. Si la IA falla, queda el local."""
+    path = config.ROOT / vis["path"]
+    mode = vis.get("ia_edit")
+    if mode and os.environ.get("OPENAI_API_KEY"):
+        if not edit_allowed(vis["path"], mode if mode in EDIT_PRESETS else "libre"):
+            log.warning("ia_edit '%s' no se permite en %s (solo 'luz'); se usa retoque local", mode, vis["path"])
+        else:
+            instruction = EDIT_PRESETS.get(mode) or f"{mode}. {PRESERVE}"
+            try:
+                path = _openai_edit(path, instruction, workdir / f"edit_{seed}.jpg", size[1] > size[0])
+            except Exception as exc:  # noqa: BLE001
+                log.warning("No se pudo retocar con OpenAI (%s); se usa retoque local", exc)
+    level = vis.get("retoque", "suave")
+    if level in (False, "no"):
+        return path
+    out = workdir / f"ret_{seed}.jpg"
+    retouch(ImageOps.exif_transpose(Image.open(path)), level).save(out, quality=95)
+    return out
+
+
 def ai_image(vis: dict, size: tuple[int, int], dest: Path, seed: int) -> Path:
     """OpenAI si hay clave (mejor calidad); si no hay o falla, Pollinations."""
     if os.environ.get("OPENAI_API_KEY") and vis.get("engine", "auto") != "pollinations":
@@ -267,7 +359,9 @@ def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int) -> 
         return _card(vis, size, workdir / f"card_{seed}.jpg"), "image"
     if src == "file":
         path = config.ROOT / vis["path"]
-        return path, "video" if path.suffix.lower() in VIDEO_EXT else "image"
+        if path.suffix.lower() in VIDEO_EXT:
+            return path, "video"
+        return prepare_photo(vis, size, workdir, seed), "image"
     raise RenderError(f"Fuente desconocida: {src}")
 
 
