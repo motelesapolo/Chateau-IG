@@ -1,0 +1,16 @@
+# Archivos pesados: viven en la rama `media`, no en main (solo se guarda la vista previa).
+media/*/*
+!media/*/preview.jpg
+
+# Memoria de la bandeja (vive en la caché de GitHub Actions, nunca en el repo público).
+.state/
+
+# Secretos locales
+.env
+*.token
+token.txt
+
+__pycache__/
+*.pyc
+.pytest_cache/
+out-test/

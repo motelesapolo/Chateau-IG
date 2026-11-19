@@ -1,0 +1,47 @@
+name: 2 · Publicar a su hora
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # cada 15 minutos (GitHub puede atrasarlo unos minutos)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-writer
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Publicar lo que corresponde
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          DRY_RUN: ${{ vars.DRY_RUN }}
+        run: |
+          pip install -q requests
+          python scripts/publish_due.py
+
+      - name: Guardar cambios en main
+        run: |
+          git config user.name "ig-autopilot"
+          git config user.email "ig-autopilot@users.noreply.github.com"
+          git add -A queue published
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -qm "publicado: $(date -u +%F\ %H:%M) UTC"
+          for i in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase origin main
+          done
+          exit 1
