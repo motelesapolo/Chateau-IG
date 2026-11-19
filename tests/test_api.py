@@ -23,7 +23,8 @@ class FakeSession:
         self.calls = []
 
     def request(self, method, url, params=None, json=None, timeout=None):
-        path = url.split("/v25.0/")[1]
+        self.hosts = getattr(self, "hosts", set()) | {url.split("/v26.0/")[0]}
+        path = url.split("/v26.0/")[1]
         self.calls.append((method, path, dict(params or {}), json))
         for (m, suffix), handler in self.routes.items():
             if m == method and path == suffix:
@@ -32,12 +33,38 @@ class FakeSession:
         return Resp({"error": {"message": f"ruta no simulada {method} {path}", "code": 100}}, 400)
 
 
-ME = {("GET", "me"): {"id": "app1", "user_id": "178", "username": "micuenta"}}
+ME = {("GET", "me/assigned_instagram_accounts"): {"data": [{"id": "178", "username": "micuenta"}]}}
 
 
-def client(routes):
+def client(routes, **kw):
     sess = FakeSession({**ME, **routes})
-    return InstagramClient("TOKEN", "v25.0", session=sess, sleep=lambda s: None), sess
+    return InstagramClient("TOKEN", "v26.0", session=sess, sleep=lambda s: None, **kw), sess
+
+
+def test_unified_login_discovers_account_on_graph_facebook():
+    c, s = client({("GET", "178"): {"id": "178", "username": "micuenta", "followers_count": 3}})
+    assert c.ig_id == "178" and c.username == "micuenta"
+    assert s.hosts == {"https://graph.facebook.com"}
+
+
+def test_discovery_picks_requested_username(monkeypatch):
+    monkeypatch.setenv("IG_USERNAME", "@otra")
+    c, _ = client({("GET", "me/assigned_instagram_accounts"):
+                   {"data": [{"id": "1", "username": "micuenta"}, {"id": "2", "username": "otra"}]}})
+    assert c.ig_id == "2"
+
+
+def test_explicit_ig_user_id_skips_discovery():
+    c, s = client({("GET", "999"): {"id": "999", "username": "x"}}, ig_user_id="999")
+    c.me()
+    assert not any(call[1].startswith("me/") for call in s.calls)
+
+
+def test_discovery_failure_explains_what_to_do():
+    sess = FakeSession({})
+    c = InstagramClient("TOKEN", "v26.0", session=sess, sleep=lambda s: None)
+    with pytest.raises(InstagramError, match="IG_USER_ID"):
+        _ = c.ig_id
 
 
 def test_publish_image_with_ai_label():

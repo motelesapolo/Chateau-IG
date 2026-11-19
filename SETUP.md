@@ -1,163 +1,98 @@
 # Guía desde cero (≈ 60–90 minutos, una sola vez)
 
-Al terminar tendrás una cuenta de Instagram que publica sola, responde comentarios y
-mensajes, y que Claude alimenta cada semana. **Costo: $0** (solo necesitas el plan de Claude
-que ya usas para Claude Code).
-
-Vas a crear 5 cosas, en este orden:
+Al terminar tendrás una cuenta de Instagram que publica sola, responde comentarios y mensajes,
+y que Claude alimenta cada semana. **Costo: $0** (solo el plan de Claude que ya usas).
 
 | # | Qué | Para qué | Costo |
 |---|---|---|---|
-| 1 | Cuenta de Instagram profesional | La cuenta que se va a manejar | Gratis |
-| 2 | App de Meta (developers.facebook.com) | Permiso oficial para publicar y responder | Gratis |
-| 3 | Cuenta de GitHub + este repo | Donde viven el código, la cola y los robots | Gratis (repo público) |
-| 4 | Claves gratis: Groq (+ Pixabay opcional) | IA que responde la bandeja / videos de stock | Gratis |
-| 5 | Tarea programada semanal en Claude Code | Claude crea el contenido cada domingo | Incluido en tu plan |
+| 1 | Cuenta de Instagram profesional (Empresa) | La cuenta que se va a manejar | Gratis |
+| 2 | App de Meta con "Unified login" | Permiso oficial para publicar y responder | Gratis |
+| 3 | Cuenta de GitHub + este repo (público) | Donde viven el código, la cola y los robots | Gratis |
+| 4 | Clave de Groq (+ Pixabay opcional) | IA que responde la bandeja / stock | Gratis |
+| 5 | Tarea semanal en Claude Code | Claude crea el contenido cada domingo | Incluido |
 
-> 🔒 **Nunca pegues tokens ni claves en el chat.** Siempre van en GitHub → Secrets (paso 6).
+> 🔒 **Nunca pegues tokens ni claves en un chat.** Siempre van en GitHub → Secrets (paso 6).
 
 ---
 
-## Paso 1 · Crear la cuenta de Instagram (10 min)
+## Paso 1 · Cuenta de Instagram (10 min)
+1. Crea la cuenta desde la app (correo sin otra cuenta asociada).
+2. Hazla **pública** (Configuración → Privacidad de la cuenta).
+3. Pásala a **profesional → Empresa** (Configuración → Tipo de cuenta y herramientas). No hace falta página de Facebook.
+4. Si la cuenta fuera un personaje inventado por IA, activa la etiqueta de perfil generado por IA.
 
-1. En el celular, abre Instagram → **Crear cuenta nueva**. Usa un correo nuevo o uno que no tenga
-   otra cuenta asociada. Elige el nombre de usuario de la cuenta.
-2. Pon foto de perfil, nombre y biografía (Claude te puede proponer textos).
-3. Hazla **pública**: Configuración → Privacidad de la cuenta → desactiva "Cuenta privada".
-4. Pásala a **profesional, tipo Empresa (Business)**:
-   Configuración → *Tipo de cuenta y herramientas* → **Cambiar a cuenta profesional** →
-   elige una categoría → **Empresa**. (Empresa en vez de Creador porque las historias por API
-   han estado limitadas a cuentas de empresa.) No hace falta conectar una página de Facebook.
-5. Si la cuenta va a ser un **personaje inventado por IA**, activa la etiqueta de perfil
-   generado por IA en la configuración del perfil. Sin ella Instagram le quita alcance.
-6. Úsala un poco "como humano" los primeros días (sube 1–2 fotos a mano, completa el perfil).
-   Las cuentas recién creadas que publican de inmediato por API se ven sospechosas.
+## Paso 2 · App de Meta (20 min)
+Las apps nuevas de Meta solo ofrecen **"API setup with Unified login"** (Facebook Login for Business).
+No necesita página de Facebook, pero sí un **portfolio comercial** (gratis).
 
-## Paso 2 · Crear la app de Meta (20 min)
+1. **developers.facebook.com** → inicia sesión con Facebook → regístrate como desarrollador.
+2. **Crear app** → caso de uso **Otro** → tipo **Negocios** → nombre sin la palabra "Instagram" (ej. `lechateau-piloto`).
+3. Agrega el producto **Instagram → Configurar**.
+4. Menú izquierdo **Instagram → API setup with Unified login**:
+   - Si pide **portfolio comercial**: "+ Portfolio comercial" → crea uno (nombre del negocio, tu nombre, correo) y confírmalo por correo.
+   - **1. Configurar tu app** → **Crear nueva configuración** con: variación *General*, token *de usuario del sistema (SUAT)*,
+     caducidad *Nunca*, activo *tu cuenta de Instagram*, permisos `instagram_basic`, `instagram_content_publish`,
+     `instagram_manage_comments`, `instagram_manage_messages` (los `ads_*` que vienen por defecto no molestan).
+   - **URL de redireccionamiento:** `https://localhost/` → guardar.
+5. **Roles de la app → Roles** → agrega la cuenta de Instagram como **Evaluador de Instagram** y acepta la invitación
+   (instagram.com → Configuración → Apps y sitios web → Invitaciones de evaluador).
+6. Vuelve a **API setup with Unified login → 2. Generar tokens de acceso** → agrega la cuenta.
+   **El token se genera recién en el paso 6**, para pegarlo directo en GitHub.
+7. Salta "3. Webhooks" y "4. Revisión de la app". Deja la app en modo **Development**.
 
-1. Entra a **developers.facebook.com** con una cuenta de **Facebook** (es obligatorio tener una;
-   puede ser la tuya personal, no se publica nada en ella) → **Comenzar / Get Started** y completa
-   el registro como desarrollador (verifica tu correo/teléfono).
-2. **Crear app** (Create App):
-   - Conectar un negocio: **"No quiero conectar un portafolio comercial por ahora"** → Siguiente.
-   - Caso de uso: **Otro** (Other) → Siguiente.
-   - Tipo de app: **Negocios** (Business) → Siguiente.
-   - Nombre de la app (ej. "piloto-mi-cuenta") y tu correo → **Crear app**.
-3. En el panel de la app, busca el producto **Instagram** → **Configurar** (Set up).
-   Se agrega "API setup with Instagram login".
-4. En **Instagram → API setup with Instagram login**, sección **"1. Generate access tokens"**:
-   - **Add account** → inicia sesión con la cuenta de Instagram del paso 1 y acepta los permisos.
-   - Si te lo pide, en la app de Instagram acepta la invitación de evaluador
-     (Configuración → Apps y sitios web → Invitaciones de evaluador).
-   - Junto a la cuenta, presiona **Generate token**, acepta, y **copia el token** (empieza con `IG...`).
-     Guárdalo un momento en un lugar seguro (lo pegarás en el paso 6). Dura 60 días; el sistema
-     lo renueva solo cada semana.
-5. Revisa que en la lista de permisos estén: `instagram_business_basic`,
-   `instagram_business_content_publish`, `instagram_business_manage_comments`,
-   `instagram_business_manage_messages` (y `instagram_business_manage_insights`).
-
-> No necesitas "App Review" ni verificación de negocio: la app solo maneja **tu** cuenta, y para eso
-> basta el acceso estándar. Si más adelante los DMs no llegan desde usuarios comunes, mira
-> "Problemas frecuentes" al final.
-
-## Paso 3 · Crear la cuenta de GitHub y el repositorio (10 min)
-
-1. Crea una cuenta en **github.com** (gratis).
-2. Arriba a la derecha **+ → New repository**:
-   - Nombre: por ejemplo `mi-instagram`.
-   - Visibilidad: **Public** ← importante: así GitHub Actions es gratis e ilimitado y la CDN
-     puede servir las imágenes a Instagram. (No se guarda nada privado: ni mensajes ni tokens.)
-   - Deja todo lo demás vacío → **Create repository**.
-3. Vuelve al chat con Claude y dile: *"Ya creé el repo `TU_USUARIO/mi-instagram`, súbelo"*.
-   Claude conectará GitHub (te pedirá autorizar la app de Claude en GitHub) y subirá todos los archivos.
+## Paso 3 · GitHub (10 min)
+1. Crea una cuenta en **github.com**.
+2. **+ → New repository** → nombre (ej. `lechateau-ig`) → **Public** → sin README → **Create repository**.
+   (Público = Actions gratis e ilimitado y las imágenes se pueden servir a Instagram. Nunca se guardan mensajes ni tokens.)
+3. Dile a Claude el nombre del repo: él lo conecta y sube todos los archivos.
 
 ## Paso 4 · Claves gratis (10 min)
+- **Groq (obligatoria):** console.groq.com → API Keys → Create API Key.
+- **Pixabay (opcional, stock):** pixabay.com/api/docs con la sesión iniciada → tu `key`.
+- **Pollinations (opcional, más imágenes IA sin límites):** auth.pollinations.ai → token.
 
-- **Groq (obligatoria, responde la bandeja):** entra a **console.groq.com** → crea cuenta (sin tarjeta)
-  → **API Keys → Create API Key** → copia la clave (`gsk_...`).
-- **Pixabay (opcional, fotos y videos de stock gratis):** crea cuenta en **pixabay.com** → abre
-  **pixabay.com/api/docs/** con la sesión iniciada → tu clave aparece en la sección "Parameters" (`key`).
-- **Pollinations (opcional, quita límites/marca de agua de las imágenes IA):** **auth.pollinations.ai**
-  → inicia sesión con GitHub → copia tu token.
+## Paso 5 · Completar la personalidad (10 min, con Claude)
+`config/persona.md`: negocio, servicios, precios, cómo reservar, tono, preguntas frecuentes.
+Mientras quede algún `[COMPLETAR]`, la bandeja y el lote semanal no se ejecutan.
 
-## Paso 5 · Token de GitHub para renovar el token de Instagram solo (5 min)
+## Paso 6 · Generar el token y guardar los secretos (10 min)
+1. Abre en otra pestaña tu repo → **Settings → Secrets and variables → Actions → New repository secret**.
+2. En Meta → **API setup with Unified login → 2. Generar tokens de acceso** → **Generar token** junto a la cuenta → cópialo.
+3. Pégalo en GitHub como secreto **`IG_ACCESS_TOKEN`** → *Add secret*. Cierra la ventana del token.
+4. Agrega también:
 
-1. GitHub → tu foto → **Settings → Developer settings → Personal access tokens → Fine-grained tokens
-   → Generate new token**.
-2. Nombre: `renovar-token-ig`. Expiración: la máxima permitida (anota la fecha para renovarlo).
-3. **Repository access → Only select repositories →** elige `mi-instagram`.
-4. **Permissions → Repository permissions → Secrets: Read and write**.
-5. **Generate token** → copia el token (`github_pat_...`).
-
-## Paso 6 · Guardar los secretos en GitHub (5 min)
-
-En tu repo: **Settings → Secrets and variables → Actions → New repository secret**, uno por uno:
-
-| Nombre (exacto) | Valor |
+| Secreto | Valor |
 |---|---|
-| `IG_ACCESS_TOKEN` | Token de Instagram del paso 2 |
-| `GROQ_API_KEY` | Clave de Groq |
-| `GH_PAT` | Token de GitHub del paso 5 |
-| `PIXABAY_KEY` | (opcional) clave de Pixabay |
-| `POLLINATIONS_TOKEN` | (opcional) token de Pollinations |
+| `GROQ_API_KEY` | clave de Groq |
+| `PIXABAY_KEY` | (opcional) |
+| `POLLINATIONS_TOKEN` | (opcional) |
 
-Luego, en la pestaña **Variables** (al lado de Secrets) → **New repository variable**:
-`DRY_RUN` = `1`. Esto deja todo en **modo simulación** la primera semana: el sistema decide qué
-publicar y qué responder, pero no envía nada. Lo quitas en el paso 9.
+5. Pestaña **Variables → New repository variable**: `DRY_RUN` = `1` (modo simulación: decide pero no publica ni responde).
 
-## Paso 7 · Completar la personalidad de la cuenta (10 min, con Claude)
+## Paso 7 · Revisar la conexión (2 min)
+Repo → **Actions → 0 · Revisar configuración → Run workflow**. Todo debe salir ✅
+(el resumen muestra el @ y el ID de la cuenta encontrada). Si falla con "No se encontró la cuenta",
+crea la variable `IG_USER_ID` con el ID de la cuenta de Instagram (Claude te ayuda a obtenerlo).
 
-Edita `config/persona.md` (o pídele a Claude que lo complete contigo): nicho, público, tono,
-pilares de contenido, preguntas frecuentes y el mensaje de crisis. Mientras quede algún
-`[COMPLETAR]`, ni la bandeja ni el lote semanal se ejecutan.
+## Paso 8 · Primer lote y encendido
+1. En **claude.ai/code**, abre una sesión con el repo y escribe `/lote-semanal`. Revisa las vistas previas en `media/<id>/preview.jpg`.
+2. **Actions → 2 · Publicar a su hora → Run workflow**: en simulación verás qué se publicaría.
+3. Conforme → **borra la variable `DRY_RUN`**. Desde ahí publica y responde de verdad.
 
-## Paso 8 · Revisar que todo esté conectado (2 min)
+## Paso 9 · Lote semanal automático
+**claude.ai/code/routines → New routine** (o pídeselo a Claude): repo `lechateau-ig`, domingos ~20:40,
+instrucción `Sigue al pie de la letra .claude/commands/lote-semanal.md`.
 
-Repo → pestaña **Actions** → **0 · Revisar configuración** → **Run workflow**.
-Debe salir todo en ✅. Si algo sale en ❌, el mensaje dice qué falta.
-
-## Paso 9 · Primer lote y encendido (15 min)
-
-1. En **claude.ai/code** abre una sesión con tu repo y escribe: `/lote-semanal`.
-   Claude investiga, planifica la semana, crea los guiones y los sube. GitHub genera las imágenes y
-   videos (≈ 10–20 min). Revisa las vistas previas en `media/<id>/preview.jpg`.
-2. En **Actions → 2 · Publicar a su hora → Run workflow**: en modo simulación verás en el resumen
-   qué se publicaría.
-3. Cuando estés conforme, **borra la variable `DRY_RUN`** (Settings → Secrets and variables →
-   Variables). Desde ese momento publica y responde de verdad.
-
-## Paso 10 · Dejar el lote semanal en automático (5 min)
-
-En **claude.ai/code/routines** → **New routine** (o pídeselo a Claude en el chat):
-- Repositorio: `mi-instagram`.
-- Horario: **domingos ~20:40** (hora de Chile), después del informe semanal de las 18:00.
-- Instrucción: `Sigue al pie de la letra .claude/commands/lote-semanal.md`.
-- No hace falta activar "Allow unrestricted branch pushes": Claude sube a una rama `claude/...`
-  y GitHub la incorpora sola.
-
-¡Listo! Desde aquí:
-- **Domingo 18:00** → informe con métricas (`reports/`).
-- **Domingo ~20:40** → Claude crea la semana siguiente y revisa la calidad.
-- **Cada 15 min** → se publica lo que toca.
-- **Cada hora** → se responden comentarios y DMs.
-- **Lunes** → se renueva el token.
-
-Tu única tarea: mirar de vez en cuando la app de Instagram por si hay mensajes que el bot marcó
-para revisión humana (propuestas comerciales, quejas serias, crisis). El informe semanal te dice cuántos hay.
+Rutina resultante: domingo 18:00 informe → domingo ~20:40 Claude crea la semana → cada 15 min se publica →
+cada hora se responde la bandeja → lunes se revisa que todo siga conectado (GitHub te avisa por correo si falla).
 
 ---
 
 ## Problemas frecuentes
-
-- **"Falta la variable IG_ACCESS_TOKEN"** → el secreto no está o tiene otro nombre (paso 6).
-- **El token venció (error 190)** → genera uno nuevo como en el paso 2.4 y reemplaza el secreto.
-  Si pasa seguido, revisa que exista `GH_PAT` y que **5 · Renovar token** termine en verde.
-- **Los DMs de usuarios comunes no aparecen o no se pueden responder** → la app sigue en modo
-  desarrollo. Pasa la app a **Live** (Publicar) en el panel de Meta: te pedirá una URL de política de
-  privacidad (usa la de `PRIVACY.md` de tu repo: `https://github.com/TU_USUARIO/mi-instagram/blob/main/PRIVACY.md`)
-  y, si Meta lo exige, solicita acceso avanzado a `instagram_business_manage_messages` en App Review.
-- **Un video quedó en `render_failed` o `publish_failed`** → el campo `error` del JSON en `queue/`
-  explica la causa; el lote del domingo lo revisa y corrige.
-- **GitHub dejó de ejecutar los horarios** → GitHub pausa los horarios de repos sin actividad por
-  60 días; el lote semanal hace commits, así que no debería pasar. Si pasa: Actions → reactivar.
-- **Quiero pausar todo** → Actions → elige el workflow → "…" → **Disable workflow**.
+- **"Falta la variable IG_ACCESS_TOKEN"** → el secreto no está o tiene otro nombre.
+- **Error 190 (token inválido)** → genera uno nuevo (paso 6.2) y reemplaza el secreto.
+- **No llegan DMs de usuarios comunes** → la app está en *Development*. Hay que completar "4. Revisión de la app"
+  para acceso avanzado a `instagram_manage_messages` y pasarla a *Activo*; pide una política de privacidad: usa
+  `https://github.com/TU_USUARIO/lechateau-ig/blob/main/PRIVACY.md`.
+- **Un contenido quedó en `render_failed` o `publish_failed`** → el campo `error` del JSON en `queue/` explica la causa.
+- **Pausar todo** → Actions → elige el workflow → "…" → **Disable workflow**.

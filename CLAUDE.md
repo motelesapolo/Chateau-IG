@@ -1,6 +1,7 @@
 # ig-autopilot — instrucciones para Claude
 
-Este repo maneja una cuenta de Instagram de forma autónoma usando **solo la API oficial de Meta**.
+Este repo maneja una cuenta de Instagram de forma autónoma usando **solo la API oficial de Meta**
+(Instagram API with Unified Login: `graph.facebook.com`, token de usuario del sistema que no vence).
 Claude crea el contenido una vez por semana; GitHub Actions hace el resto.
 
 ## Cómo funciona
@@ -11,7 +12,7 @@ Claude crea el contenido una vez por semana; GitHub Actions hace el resto.
 | Publicar a la hora indicada | Action `publish.yml` | Cada 15 min |
 | Responder comentarios y DMs (Groq, gratis) | Action `inbox.yml` | Cada hora |
 | Informe con métricas (`reports/`) | Action `report.yml` | Domingo 18:00 Chile |
-| Renovar el token de Instagram | Action `refresh-token.yml` | Lunes |
+| Revisar que todo siga conectado (avisa por correo si falla) | Action `check.yml` | Lunes |
 
 - El formato de cada publicación está documentado arriba de `autopilot/queue.py`. Léelo antes de escribir la cola.
 - Identidad, voz y reglas de la cuenta: `config/persona.md`. Ajustes: `config/settings.json`.

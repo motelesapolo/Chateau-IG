@@ -1,12 +1,18 @@
-"""Cliente mínimo de la API oficial de Instagram (Instagram API with Instagram Login).
+"""Cliente mínimo de la API oficial de Instagram (Instagram API with Unified Login).
 
-Host: graph.instagram.com. No requiere página de Facebook.
-Permisos: instagram_business_basic, instagram_business_content_publish,
-instagram_business_manage_comments, instagram_business_manage_messages.
+Las apps de Meta creadas desde fines de 2026 solo ofrecen "Unified login": Facebook Login for
+Business con una configuración que entrega un token de usuario del sistema del negocio
+(no vence si la configuración dice "Nunca"). No requiere página de Facebook.
+Host: graph.facebook.com. Las llamadas van a /{id-de-la-cuenta-de-instagram}/...
+Permisos: instagram_basic, instagram_content_publish, instagram_manage_comments,
+instagram_manage_messages, instagram_manage_insights.
+
+También funciona con el modo antiguo "Instagram Login" usando host=graph.instagram.com.
 """
 from __future__ import annotations
 
 import logging
+import os
 import time
 from typing import Any
 
@@ -14,7 +20,7 @@ import requests
 
 log = logging.getLogger(__name__)
 
-HOST = "https://graph.instagram.com"
+HOST = "https://graph.facebook.com"
 
 
 class InstagramError(RuntimeError):
@@ -32,17 +38,19 @@ class InstagramError(RuntimeError):
 
 
 class InstagramClient:
-    def __init__(self, access_token: str, api_version: str = "v25.0",
-                 session: requests.Session | None = None, sleep=time.sleep):
+    def __init__(self, access_token: str, api_version: str = "v26.0", ig_user_id: str | None = None,
+                 host: str = HOST, session: requests.Session | None = None, sleep=time.sleep):
         self.token = access_token
         self.version = api_version
+        self.host = host.rstrip("/")
         self.http = session or requests.Session()
         self.sleep = sleep
+        self._ig_id = str(ig_user_id) if ig_user_id else None
         self._me: dict | None = None
 
     # ------------------------------------------------------------------ base
     def _url(self, path: str) -> str:
-        return f"{HOST}/{self.version}/{path.lstrip('/')}"
+        return f"{self.host}/{self.version}/{path.lstrip('/')}"
 
     def request(self, method: str, path: str, params: dict | None = None,
                 json_body: dict | None = None, retries: int = 3) -> dict:
@@ -84,15 +92,37 @@ class InstagramClient:
         return self.request("POST", path, params=params, json_body=json_body)
 
     # --------------------------------------------------------------- cuenta
-    def me(self) -> dict:
-        if self._me is None:
-            self._me = self.get("me", fields="user_id,username,account_type,media_count,followers_count")
-        return self._me
+    def discover_ig_id(self) -> str:
+        """Busca el ID de la cuenta de Instagram a la que el token tiene acceso."""
+        if "graph.instagram.com" in self.host:  # modo antiguo: /me es la cuenta
+            me = self.get("me", fields="user_id,username")
+            return str(me.get("user_id") or me["id"])
+        errors = []
+        for path in ("me/assigned_instagram_accounts", "me/instagram_accounts"):
+            try:
+                data = self.get(path, fields="id,username").get("data", [])
+            except InstagramError as exc:
+                errors.append(f"{path}: {exc}")
+                continue
+            if data:
+                wanted = (os.environ.get("IG_USERNAME") or "").lower().lstrip("@")
+                for acc in data:
+                    if not wanted or acc.get("username", "").lower() == wanted:
+                        return str(acc["id"])
+                return str(data[0]["id"])
+        raise InstagramError("No se encontró la cuenta de Instagram con este token. Agrega la variable "
+                             "IG_USER_ID con el ID de la cuenta (ver SETUP.md). " + " | ".join(errors))
 
     @property
     def ig_id(self) -> str:
-        me = self.me()
-        return str(me.get("user_id") or me["id"])
+        if not self._ig_id:
+            self._ig_id = self.discover_ig_id()
+        return self._ig_id
+
+    def me(self) -> dict:
+        if self._me is None:
+            self._me = self.get(self.ig_id, fields="id,username,name,media_count,followers_count")
+        return self._me
 
     @property
     def username(self) -> str:
@@ -208,7 +238,7 @@ class InstagramClient:
 
     # ------------------------------------------------------------- mensajes
     def list_conversations(self, limit: int = 20) -> list[dict]:
-        return self.get("me/conversations", platform="instagram",
+        return self.get(f"{self.ig_id}/conversations", platform="instagram",
                         fields="id,updated_time", limit=limit).get("data", [])
 
     def conversation_messages(self, conversation_id: str, limit: int = 10) -> list[dict]:
@@ -224,13 +254,13 @@ class InstagramClient:
         return self.post(f"{self.ig_id}/messages",
                          json_body={"recipient": {"id": recipient_id}, "message": {"text": text}})
 
-    # --------------------------------------------------------------- token
-    @staticmethod
-    def refresh_token(token: str, session: requests.Session | None = None) -> dict:
-        http = session or requests.Session()
-        resp = http.get(f"{HOST}/refresh_access_token",
-                        params={"grant_type": "ig_refresh_token", "access_token": token}, timeout=60)
-        data = resp.json()
-        if resp.status_code >= 400 or "error" in data:
-            raise InstagramError(str(data.get("error", data)), status=resp.status_code, payload=data)
-        return data
+
+def client_from_env(settings: dict) -> InstagramClient:
+    """Crea el cliente con los secretos de GitHub Actions."""
+    from . import config
+    return InstagramClient(
+        config.env("IG_ACCESS_TOKEN"),
+        api_version=settings.get("api_version", "v26.0"),
+        ig_user_id=os.environ.get("IG_USER_ID") or None,
+        host=settings.get("api_host", HOST),
+    )

@@ -35,6 +35,7 @@ jobs:
       - name: Generar informe
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ vars.IG_USER_ID }}
         run: |
           pip install -q requests
           python scripts/weekly_report.py

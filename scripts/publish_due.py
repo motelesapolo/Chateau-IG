@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 import _boot
 from autopilot import config, hosting
 from autopilot import queue as q
-from autopilot.api import InstagramClient, InstagramError
+from autopilot.api import InstagramClient, InstagramError, client_from_env
 
 log = logging.getLogger("publish")
 
@@ -44,7 +44,7 @@ def main() -> int:
         return 0
 
     dry = config.dry_run()
-    client = InstagramClient(config.env("IG_ACCESS_TOKEN"), settings.get("api_version", "v25.0"))
+    client = client_from_env(settings)
     sha = hosting.media_sha()
     if not sha:
         print("No existe la rama media todavía: falta renderizar.")

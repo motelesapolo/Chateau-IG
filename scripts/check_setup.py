@@ -9,7 +9,7 @@ import requests
 
 import _boot
 from autopilot import config
-from autopilot.api import InstagramClient, InstagramError
+from autopilot.api import InstagramError, client_from_env
 from autopilot.llm import GroqLLM
 
 
@@ -31,9 +31,10 @@ def main() -> int:
     token = os.environ.get("IG_ACCESS_TOKEN")
     if token:
         try:
-            c = InstagramClient(token, settings.get("api_version", "v25.0"))
+            c = client_from_env(settings)
             me = c.me()
-            mark(True, f"Instagram conectado: @{me.get('username')} ({me.get('account_type')})")
+            mark(True, f"Instagram conectado: @{me.get('username')} (ID {c.ig_id}, "
+                       f"{me.get('followers_count', 0)} seguidores)")
             try:
                 lim = c.publishing_limit()
                 mark(True, f"Permiso de publicación OK (usadas hoy: {lim.get('quota_usage', 0)})")
@@ -71,9 +72,6 @@ def main() -> int:
         mark(r.status_code == 200, "Pexels OK" if r.status_code == 200 else f"Pexels falló ({r.status_code})")
     else:
         lines.append("- ➖ Sin PEXELS_KEY (opcional)")
-    if os.environ.get("GITHUB_ACTIONS"):
-        mark(bool(os.environ.get("HAS_GH_PAT")), "GH_PAT configurado (para renovar el token solo)"
-             if os.environ.get("HAS_GH_PAT") else "Falta GH_PAT: el token de Instagram no se renovará solo")
 
     _boot.step_summary("\n".join(lines) + ("\n\n**Todo listo ✅**" if ok else "\n\n**Faltan cosas ❌**"))
     return 0 if ok else 1

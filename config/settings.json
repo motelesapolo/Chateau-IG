@@ -1,7 +1,8 @@
 {
   "timezone": "America/Santiago",
   "language": "es",
-  "api_version": "v25.0",
+  "api_host": "https://graph.facebook.com",
+  "api_version": "v26.0",
   "ai_generated_label": true,
 
   "tts_voice": "es-CL-CatalinaNeural",

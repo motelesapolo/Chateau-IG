@@ -34,7 +34,7 @@ class FakeIG:
 def env(project, monkeypatch):
     FakeIG.fail, FakeIG.calls = None, []
     monkeypatch.setenv("IG_ACCESS_TOKEN", "x")
-    monkeypatch.setattr(publish_due, "InstagramClient", FakeIG)
+    monkeypatch.setattr(publish_due, "client_from_env", lambda settings: FakeIG())
     monkeypatch.setattr(publish_due.hosting, "media_sha", lambda: "abc123")
     monkeypatch.setattr(publish_due.hosting, "reachable_url", lambda f, sha: f"https://cdn/{sha}/{f}")
     return project

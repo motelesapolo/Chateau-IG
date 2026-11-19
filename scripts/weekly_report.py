@@ -13,13 +13,13 @@ from datetime import datetime, timedelta, timezone
 import _boot
 from autopilot import config
 from autopilot import queue as q
-from autopilot.api import InstagramClient
+from autopilot.api import client_from_env
 from autopilot.inbox import parse_ts
 
 
 def main() -> int:
     settings = config.load_settings()
-    client = InstagramClient(config.env("IG_ACCESS_TOKEN"), settings.get("api_version", "v25.0"))
+    client = client_from_env(settings)
     now = datetime.now(timezone.utc)
     since = now - timedelta(days=7)
     me = client.me()
