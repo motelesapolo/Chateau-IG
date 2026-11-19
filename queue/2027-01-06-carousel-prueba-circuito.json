@@ -1,0 +1,41 @@
+{
+  "id": "2027-01-06-carousel-prueba-circuito",
+  "type": "carousel",
+  "publish_at": "2027-01-06T12:30:00-03:00",
+  "caption": "PRUEBA DEL SISTEMA — no publicar. #prueba",
+  "scenes": [
+    {
+      "visual": {
+        "source": "file",
+        "path": "material/habitaciones/simple/chateaueditadas-720x720-1-1.jpg"
+      },
+      "text": "Habitación Simple"
+    },
+    {
+      "visual": {
+        "source": "card",
+        "bg": "#f3e6d3",
+        "bg2": "#e2c9a6"
+      },
+      "text": "Promo 6x3: pagas 3 horas y te quedas 6"
+    },
+    {
+      "visual": {
+        "source": "card",
+        "bg": "#1b1410",
+        "bg2": "#3d2b1f"
+      },
+      "text": "Estacionamiento privado y gratis en Marín 021"
+    }
+  ],
+  "status": "rendered",
+  "media": {
+    "kind": "carousel",
+    "files": [
+      "media/2027-01-06-carousel-prueba-circuito/slide_01.jpg",
+      "media/2027-01-06-carousel-prueba-circuito/slide_02.jpg",
+      "media/2027-01-06-carousel-prueba-circuito/slide_03.jpg"
+    ],
+    "preview": "media/2027-01-06-carousel-prueba-circuito/preview.jpg"
+  }
+}

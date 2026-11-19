@@ -1,0 +1,57 @@
+{
+  "id": "2027-01-05-reel-prueba-circuito",
+  "type": "reel",
+  "publish_at": "2027-01-05T19:30:00-03:00",
+  "caption": "PRUEBA DEL SISTEMA — no publicar.\n\nTu escapada a minutos de todo 🌙 #prueba",
+  "scenes": [
+    {
+      "visual": {
+        "source": "card",
+        "bg": "#1b1410",
+        "bg2": "#3d2b1f"
+      },
+      "text": "¿Cuándo fue la última vez que desconectaste?",
+      "narration": "¿Cuándo fue la última vez que desconectaste de verdad?",
+      "duration": 3
+    },
+    {
+      "visual": {
+        "source": "pollinations",
+        "prompt": "rain drops on a window at night, warm bokeh city lights of Santiago, cozy mood, vertical, cinematic, no people"
+      },
+      "text": "Afuera, la semana",
+      "narration": "Afuera queda la semana.",
+      "duration": 3
+    },
+    {
+      "visual": {
+        "source": "file",
+        "path": "material/habitaciones/simple/chateaueditadas-720x720-4-7.jpg"
+      },
+      "text": "Adentro, solo descanso",
+      "narration": "Adentro, solo descanso.",
+      "duration": 3.5
+    },
+    {
+      "visual": {
+        "source": "card",
+        "bg": "#3d2b1f",
+        "bg2": "#1b1410"
+      },
+      "text": "Reserva por WhatsApp. Link en el perfil",
+      "narration": "Reserva por WhatsApp, el link está en nuestro perfil.",
+      "duration": 3
+    }
+  ],
+  "status": "rendered",
+  "media": {
+    "kind": "video",
+    "files": [
+      "media/2027-01-05-reel-prueba-circuito/reel.mp4"
+    ],
+    "cover": "media/2027-01-05-reel-prueba-circuito/cover.jpg",
+    "preview": "media/2027-01-05-reel-prueba-circuito/preview.jpg",
+    "duration": 14.2,
+    "size_mb": 0.88
+  }
+}

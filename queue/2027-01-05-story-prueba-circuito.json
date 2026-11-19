@@ -1,0 +1,22 @@
+{
+  "id": "2027-01-05-story-prueba-circuito",
+  "type": "story",
+  "publish_at": "2027-01-05T10:00:00-03:00",
+  "scenes": [
+    {
+      "visual": {
+        "source": "file",
+        "path": "material/habitaciones/simple/chateaueditadas-720x720-4-6.jpg"
+      },
+      "text": "Hoy se descansa 🌙"
+    }
+  ],
+  "status": "rendered",
+  "media": {
+    "kind": "image",
+    "files": [
+      "media/2027-01-05-story-prueba-circuito/story.jpg"
+    ],
+    "preview": "media/2027-01-05-story-prueba-circuito/preview.jpg"
+  }
+}
