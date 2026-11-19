@@ -7,7 +7,8 @@ Eres quien maneja esta cuenta de Instagram. Prepara el lote de contenido de la *
 paso 1 falle. Al final deja un resumen corto.
 
 ## 1. Revisar que se puede trabajar
-- Lee `CLAUDE.md`, `config/persona.md`, `config/settings.json` y la cabecera de `autopilot/queue.py`.
+- Lee `CLAUDE.md`, `config/persona.md`, **`config/estrategia.md`** (cómo crecer: formatos, horarios, SEO, CTA),
+  `config/settings.json` y la cabecera de `autopilot/queue.py`.
 - Si `config/persona.md` todavía tiene `[COMPLETAR`, **detente** y explica qué falta completar.
 - `git fetch origin main && git checkout -B trabajo origin/main` para partir de lo último.
 
@@ -34,7 +35,8 @@ paso 1 falle. Al final deja un resumen corto.
 
 ## 5. Planificar
 - Usa las cantidades de `weekly_plan` en `config/settings.json` (reels, carruseles, imágenes, historias).
-- Obtén los horarios con `python scripts/when.py --week <AAAA-MM-DD del lunes>` (zona horaria correcta).
+- Horarios: usa los de `config/estrategia.md` §5 (jueves/viernes tarde a las 18:30) y conviértelos con
+  `python scripts/when.py "AAAA-MM-DD HH:MM"` (zona horaria correcta). El mejor reel de la semana va jueves o viernes.
 - Reparte los pilares de contenido de la persona. Cada publicación con un objetivo claro
   (alcance, guardados, comentarios o seguidores).
 
@@ -54,7 +56,10 @@ Reglas de calidad:
   - `pixabay_video` / `pixabay_photo` (si existe la clave): `query` corto en inglés.
   - `card`: para frases y listas.
   - `file` con `"path": "material/..."`: fotos y videos reales del hotel (obligatorio para mostrar habitaciones).
-- **Caption:** primera línea = gancho; 2–5 líneas de valor; llamado a la acción; 3–8 hashtags relevantes al final.
+- **Caption:** primera línea = gancho; 2–4 líneas de valor con palabras clave locales (ver estrategia §6);
+  llamado a la acción; **3–5 hashtags** al final (Instagram no permite más de 5).
+- **alt_text** en imágenes y carruseles: describe la foto con palabras clave (ej. "Habitación con jacuzzi privado en Providencia").
+- Cada reel con una razón para **enviárselo a la pareja** y gancho en los primeros 2 segundos (estrategia §2–3).
 - No inventes datos: si das cifras o consejos, que vengan de lo que investigaste en el paso 3.
 - `id` = `AAAA-MM-DD-tipo-tema` (minúsculas y guiones). `status` = `"planned"`.
 
@@ -80,4 +85,5 @@ El Action **1 · Renderizar contenido** incorpora la cola a `main`, genera imág
 
 ## 9. Resumen final
 Escribe un resumen breve: qué se programó (fecha, tipo, tema), qué aprendiste del informe y
-cualquier cosa que el dueño de la cuenta deba revisar en la app (mensajes marcados para revisión).
+cualquier cosa que el dueño de la cuenta deba revisar en la app (mensajes marcados para revisión),
+qué material conviene subir, y **una acción de crecimiento** de la estrategia §7 para esa semana.

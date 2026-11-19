@@ -65,3 +65,10 @@ def test_due_items(project):
     assert due[0][2] is False
     late = q.due_items(datetime(2026, 11, 26, 0, 0, tzinfo=timezone.utc), max_late_hours=5)
     assert late[0][2] is True
+
+
+def test_max_five_hashtags(project):
+    ok = item(caption="Hola #a #b #c #d #e")
+    bad = item(caption="Hola #a #b #c #d #e #f")
+    assert q.validate(ok) == []
+    assert any("máximo 5 hashtags" in e for e in q.validate(bad))

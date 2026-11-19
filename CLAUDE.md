@@ -17,6 +17,7 @@ Claude crea el contenido una vez por semana; GitHub Actions hace el resto.
 
 - El formato de cada publicación está documentado arriba de `autopilot/queue.py`. Léelo antes de escribir la cola.
 - Fotos y videos reales del hotel: `material/` (ver `material/README.md`). Inventario: `python scripts/material.py inventario`.
+- Estrategia de crecimiento (formatos, horarios, SEO, CTA): `config/estrategia.md`.
 - Identidad, voz y reglas de la cuenta: `config/persona.md`. Ajustes: `config/settings.json`.
 - Los archivos pesados viven en la rama `media` (se reescribe sola). En `main` solo queda `media/<id>/preview.jpg`.
 

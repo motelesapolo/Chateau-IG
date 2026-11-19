@@ -16,6 +16,8 @@ Formato (lo escribe Claude en el lote semanal):
     }
   ],
   "music": "assets/music/archivo.mp3",       # opcional
+  "collaborators": ["cuenta_aliada"],        # opcional: post en colaboración (hasta 3 cuentas)
+  "alt_text": "Descripción de la imagen",    # opcional: accesibilidad y búsqueda (imagen/carrusel)
   "status": "planned"                        # planned → rendered → published
 }
 
@@ -106,8 +108,9 @@ def validate(item: dict) -> list[str]:
             errs.append("falta caption")
         if len(caption) > 2200:
             errs.append(f"caption muy largo ({len(caption)} > 2200)")
-        if caption.count("#") > 30:
-            errs.append("máximo 30 hashtags")
+        tags = re.findall(r"#\w+", caption)
+        if len(tags) > 5:
+            errs.append(f"máximo 5 hashtags (Instagram limita a 5 desde dic. 2025; hay {len(tags)})")
 
     scenes = item.get("scenes") or []
     n = len(scenes)

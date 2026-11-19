@@ -133,16 +133,28 @@ class InstagramClient:
         return (data.get("data") or [{}])[0]
 
     # ------------------------------------------------------------ publicar
-    def _create_container(self, params: dict, ai_generated: bool) -> str:
+    OPTIONAL_PARAMS = ("is_ai_generated", "location_id", "collaborators", "alt_text")
+
+    def _create_container(self, params: dict, ai_generated: bool, extra: dict | None = None) -> str:
+        """Crea el contenedor. Los parámetros opcionales que la API rechace se quitan y se reintenta."""
         params = {k: v for k, v in params.items() if v is not None}
         if ai_generated:
+            params["is_ai_generated"] = "true"
+        for k, v in (extra or {}).items():
+            if v:
+                params[k] = v
+        for _ in range(len(self.OPTIONAL_PARAMS) + 1):
             try:
-                return self.post(f"{self.ig_id}/media", params={**params, "is_ai_generated": "true"})["id"]
+                return self.post(f"{self.ig_id}/media", params=params)["id"]
             except InstagramError as exc:
-                if "is_ai_generated" not in str(exc.payload or exc):
+                text = str(exc.payload or exc)
+                bad = [k for k in self.OPTIONAL_PARAMS if k in params and k in text]
+                if not bad:
                     raise
-                log.warning("La API no aceptó is_ai_generated; se publica sin la etiqueta: %s", exc)
-        return self.post(f"{self.ig_id}/media", params=params)["id"]
+                for k in bad:
+                    log.warning("La API no aceptó %s; se publica sin ese dato: %s", k, exc)
+                    params.pop(k)
+        raise InstagramError("No se pudo crear el contenedor")
 
     def wait_until_ready(self, container_id: str, timeout: int = 900, every: int = 10) -> None:
         waited = 0
@@ -167,12 +179,13 @@ class InstagramClient:
             info = {"id": media_id}
         return info
 
-    def publish_image(self, image_url: str, caption: str, ai_generated: bool = True) -> dict:
-        cid = self._create_container({"image_url": image_url, "caption": caption}, ai_generated)
+    def publish_image(self, image_url: str, caption: str, ai_generated: bool = True, extra: dict | None = None) -> dict:
+        cid = self._create_container({"image_url": image_url, "caption": caption}, ai_generated, extra)
         self.wait_until_ready(cid, timeout=120, every=3)
         return self._publish(cid)
 
-    def publish_carousel(self, image_urls: list[str], caption: str, ai_generated: bool = True) -> dict:
+    def publish_carousel(self, image_urls: list[str], caption: str, ai_generated: bool = True,
+                         extra: dict | None = None) -> dict:
         if not 2 <= len(image_urls) <= 10:
             raise ValueError("Un carrusel necesita entre 2 y 10 imágenes")
         children = []
@@ -184,16 +197,17 @@ class InstagramClient:
             self.wait_until_ready(cid, timeout=180, every=3)
         # La etiqueta de IA va solo en el contenedor del carrusel.
         parent = self._create_container({"media_type": "CAROUSEL", "children": ",".join(children),
-                                         "caption": caption}, ai_generated)
+                                         "caption": caption}, ai_generated, extra)
         self.wait_until_ready(parent, timeout=180, every=3)
         return self._publish(parent)
 
     def publish_reel(self, video_url: str, caption: str, ai_generated: bool = True,
-                     share_to_feed: bool = True, cover_url: str | None = None) -> dict:
+                     share_to_feed: bool = True, cover_url: str | None = None, extra: dict | None = None) -> dict:
+        extra = {k: v for k, v in (extra or {}).items() if k != "alt_text"}
         cid = self._create_container({
             "media_type": "REELS", "video_url": video_url, "caption": caption,
             "share_to_feed": "true" if share_to_feed else "false", "cover_url": cover_url,
-        }, ai_generated)
+        }, ai_generated, extra)
         self.wait_until_ready(cid)
         return self._publish(cid)
 

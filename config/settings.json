@@ -4,6 +4,7 @@
   "api_host": "https://graph.facebook.com",
   "api_version": "v26.0",
   "ai_generated_label": true,
+  "location_id": null,
 
   "tts_voice": "es-CL-CatalinaNeural",
   "tts_rate": "+6%",
@@ -31,7 +32,7 @@
     "carousel": 2,
     "image": 1,
     "story": 7,
-    "post_times": ["12:30", "19:30"],
-    "story_time": "10:00"
+    "post_times": ["13:00", "20:30"],
+    "story_time": "11:00"
   }
 }

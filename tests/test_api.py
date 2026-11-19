@@ -161,3 +161,23 @@ def test_rate_limit_detection():
     with pytest.raises(InstagramError) as exc:
         c.publishing_limit()
     assert exc.value.is_rate_limit
+
+
+def test_unsupported_location_is_dropped_but_post_goes_out():
+    sent = []
+
+    def create(params, _):
+        sent.append(dict(params))
+        if "location_id" in params:
+            return Resp({"error": {"message": "Invalid parameter location_id", "code": 100}}, 400)
+        return {"id": "C9"}
+
+    c, _ = client({
+        ("POST", "178/media"): create,
+        ("GET", "C9"): {"status_code": "FINISHED"},
+        ("POST", "178/media_publish"): {"id": "M9"},
+        ("GET", "M9"): {"id": "M9"},
+    })
+    c.publish_image("https://cdn/x.jpg", "hola", True, extra={"location_id": "1", "alt_text": "foto"})
+    assert "location_id" in sent[0] and "location_id" not in sent[1]
+    assert sent[1]["alt_text"] == "foto" and sent[1]["is_ai_generated"] == "true"

@@ -15,24 +15,26 @@ from autopilot.api import InstagramError  # noqa: E402
 class FakeIG:
     fail = None
     calls = []
+    extras = []
 
     def __init__(self, *a, **k):
         pass
 
-    def publish_image(self, url, caption, ai):
+    def publish_image(self, url, caption, ai, extra=None):
+        FakeIG.extras.append(extra)
         if FakeIG.fail:
             raise FakeIG.fail
         FakeIG.calls.append(("image", url, caption, ai))
         return {"id": "M1", "permalink": "https://www.instagram.com/p/abc/"}
 
-    def publish_reel(self, url, caption, ai, share_to_feed=True, cover_url=None):
+    def publish_reel(self, url, caption, ai, share_to_feed=True, cover_url=None, extra=None):
         FakeIG.calls.append(("reel", url, cover_url))
         return {"id": "M2", "permalink": "https://www.instagram.com/reel/xyz/"}
 
 
 @pytest.fixture
 def env(project, monkeypatch):
-    FakeIG.fail, FakeIG.calls = None, []
+    FakeIG.fail, FakeIG.calls, FakeIG.extras = None, [], []
     monkeypatch.setenv("IG_ACCESS_TOKEN", "x")
     monkeypatch.setattr(publish_due, "client_from_env", lambda settings: FakeIG())
     monkeypatch.setattr(publish_due.hosting, "media_sha", lambda: "abc123")
@@ -85,3 +87,10 @@ def test_rate_limit_keeps_item(env):
     publish_due.main()
     item = q.load(config.QUEUE_DIR / "2026-01-01-limite.json")
     assert item["status"] == "rendered" and item.get("attempts", 0) == 0
+
+
+def test_extras_location_collab_alt():
+    item = {"collaborators": ["@amiga", "otra", "x", "y"], "alt_text": "Jacuzzi en Providencia"}
+    assert publish_due.extras(item, {"location_id": 123}) == {
+        "location_id": "123", "collaborators": "amiga,otra,x", "alt_text": "Jacuzzi en Providencia"}
+    assert publish_due.extras({}, {"location_id": None}) == {}

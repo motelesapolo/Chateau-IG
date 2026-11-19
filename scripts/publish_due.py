@@ -14,19 +14,31 @@ from autopilot.api import InstagramClient, InstagramError, client_from_env
 log = logging.getLogger("publish")
 
 
-def publish_one(client: InstagramClient, item: dict, sha: str, ai: bool) -> dict:
+def extras(item: dict, settings: dict) -> dict:
+    out = {}
+    if settings.get("location_id"):
+        out["location_id"] = str(settings["location_id"])
+    if item.get("collaborators"):
+        out["collaborators"] = ",".join(str(c).lstrip("@") for c in item["collaborators"][:3])
+    if item.get("alt_text"):
+        out["alt_text"] = item["alt_text"][:1000]
+    return out
+
+
+def publish_one(client: InstagramClient, item: dict, sha: str, ai: bool, settings: dict | None = None) -> dict:
     media = item["media"]
+    extra = extras(item, settings or {})
     urls = [hosting.reachable_url(f, sha) for f in media["files"]]
     caption = item.get("caption", "")
     t = item["type"]
     if t == "image":
-        return client.publish_image(urls[0], caption, ai)
+        return client.publish_image(urls[0], caption, ai, extra=extra)
     if t == "carousel":
-        return client.publish_carousel(urls, caption, ai)
+        return client.publish_carousel(urls, caption, ai, extra=extra)
     if t == "reel":
         cover = hosting.reachable_url(media["cover"], sha) if media.get("cover") else None
         return client.publish_reel(urls[0], caption, ai, share_to_feed=item.get("share_to_feed", True),
-                                   cover_url=cover)
+                                   cover_url=cover, extra=extra)
     if t == "story":
         if media["kind"] == "video":
             return client.publish_story(video_url=urls[0], ai_generated=ai)
@@ -66,7 +78,7 @@ def main() -> int:
                 urls = [hosting.reachable_url(f, sha) for f in item["media"]["files"]]
                 results.append(f"- 🧪 {item['id']}: se publicaría {urls}")
                 continue
-            info = publish_one(client, item, sha, ai)
+            info = publish_one(client, item, sha, ai, settings)
             item["status"] = "published"
             item["result"] = {"media_id": info.get("id"), "permalink": info.get("permalink"),
                               "published_at": now.isoformat()}
