@@ -82,3 +82,16 @@ contenido sugerente, prometer disponibilidad. Todo eso baja el alcance o arriesg
 - Alcance a no seguidores, envíos y guardados por publicación → repetir lo que funcionó.
 - Seguidores nuevos por semana.
 - **Reservas desde Instagram** (chats de WhatsApp con la frase del enlace) → el dueño lo informa.
+
+## 10. Calendario y ofertas (plan 90 días, 20 nov 2026 – 18 feb 2027)
+Plan completo para el dueño: https://claude.ai/artifact/2ZDR3NDpyhdUiTHhjqradh
+| Etapa | Fechas | Foco del contenido |
+|---|---|---|
+| Base | 20 nov – 7 dic | Habitaciones reales, Promo 6x3, cómo llegar, "síguenos" |
+| Fiestas | 8 – 31 dic | Gift card "Regala una escapada", Pack Aniversario, Navidad (24 dic) y Año Nuevo |
+| Verano | 1 – 25 ene | Escapadas en la ciudad, sorteo del mes |
+| San Valentín | 26 ene – 14 feb | Cuenta regresiva, packs, gift cards; el mejor reel va la semana del 14 |
+- Ofertas solo si el dueño las confirmó en `config/persona.md` (gift cards, packs y beneficio "vengo de Instagram"
+  están propuestos, aún sin precio). Hasta entonces: Promo 6x3 y servicios existentes.
+- Cada semana: 1 reel pensado para enviar a la pareja, 1 carrusel de precios/promos para guardar.
+- Ganchos y CTA de ejemplo: ver el plan (sección "Textos que hacen venir a la gente").

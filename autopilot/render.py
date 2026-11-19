@@ -99,7 +99,7 @@ def _pollinations(vis: dict, size: tuple[int, int], dest: Path, seed: int) -> Pa
     headers = {}
     if os.environ.get("POLLINATIONS_TOKEN"):
         headers["Authorization"] = f"Bearer {os.environ['POLLINATIONS_TOKEN']}"
-    url = f"https://image.pollinations.ai/prompt/{quote(vis['prompt'])}"
+    url = f"https://image.pollinations.ai/prompt/{quote(branded_prompt(vis))}"
     last = None
     for attempt in range(4):
         try:
@@ -119,6 +119,14 @@ def _pollinations(vis: dict, size: tuple[int, int], dest: Path, seed: int) -> Pa
     raise RenderError(f"Pollinations no generó la imagen: {last}")
 
 
+def branded_prompt(vis: dict) -> str:
+    """Agrega el estilo de la marca a cada pedido de imagen IA (se omite con "brand_style": false)."""
+    style = brand().get("ai_style", "")
+    if vis.get("brand_style") is False or not style:
+        return vis["prompt"]
+    return f"{vis['prompt'].rstrip('. ')}. {style}"
+
+
 def _openai(vis: dict, size: tuple[int, int], dest: Path, session=None) -> Path:
     """Genera con la API de imágenes de OpenAI y recorta al tamaño de Instagram."""
     global _openai_count
@@ -130,7 +138,7 @@ def _openai(vis: dict, size: tuple[int, int], dest: Path, session=None) -> Path:
     portrait = size[1] > size[0]
     last = None
     for model in [cfg["model"], *cfg["fallback_models"]]:
-        body = {"model": model, "prompt": vis["prompt"], "n": 1, "quality": vis.get("quality", cfg["quality"]),
+        body = {"model": model, "prompt": branded_prompt(vis), "n": 1, "quality": vis.get("quality", cfg["quality"]),
                 "size": "1024x1536" if portrait else "1024x1024", "output_format": "jpeg"}
         r = http.post("https://api.openai.com/v1/images/generations", headers=headers, json=body, timeout=300)
         if r.status_code in (400, 404) and "model" in r.text.lower() and "prompt" not in r.text.lower():
@@ -272,6 +280,9 @@ BRAND_DEFAULTS = {
     "body_font": "Manrope[wght].ttf", "body_weight": "SemiBold",
     "box": "rojo", "box_alpha": 185, "text": "crema", "text_on_light": "rojo", "accent": "dorado",
     "card_bg": "rojo", "logo": "assets/brand/logo_crema.png",
+    "ai_style": ("Editorial boutique-hotel photography, warm tungsten and candlelight, deep burgundy red, "
+                 "warm cream, soft beige and muted gold palette, shallow depth of field, elegant and intimate "
+                 "but never sexual, no people, no text, no logos."),
 }
 
 
