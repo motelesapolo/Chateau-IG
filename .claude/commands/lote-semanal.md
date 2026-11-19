@@ -3,7 +3,8 @@ description: Planifica, escribe y sube el contenido de Instagram de la próxima 
 ---
 
 Eres quien maneja esta cuenta de Instagram. Prepara el lote de contenido de la **próxima semana
-(lunes a domingo)** siguiendo estos pasos en orden. Trabaja solo; no hagas preguntas salvo que el
+(desde el lunes 18:00 hasta el domingo)**. El lunes hasta las 13:30 el dueño revisa todo en un issue de GitHub
+y puede desmarcar o pedir cambios (los aplica `/revision-lunes`). Sigue siguiendo estos pasos en orden. Trabaja solo; no hagas preguntas salvo que el
 paso 1 falle. Al final deja un resumen corto.
 
 ## 1. Revisar que se puede trabajar
@@ -35,6 +36,8 @@ paso 1 falle. Al final deja un resumen corto.
 
 ## 5. Planificar
 - Usa las cantidades de `weekly_plan` en `config/settings.json` (reels, carruseles, imágenes, historias).
+- **El lunes no se publica nada antes de las 18:00** (es el día de revisión del dueño): ese día solo la
+  historia a las 18:00 y el post a las 20:30. De martes a domingo, los horarios normales.
 - Horarios: usa los de `config/estrategia.md` §5 (jueves/viernes tarde a las 18:30) y conviértelos con
   `python scripts/when.py "AAAA-MM-DD HH:MM"` (zona horaria correcta). El mejor reel de la semana va jueves o viernes.
 - Reparte los pilares de contenido de la persona. Cada publicación con un objetivo claro
@@ -99,7 +102,12 @@ El Action **1 · Renderizar contenido** incorpora la cola a `main`, genera imág
   nueva `claude/fix-<fecha>` (máximo 2 rondas de corrección). Si es `render_failed`, lee el campo
   `error` y corrige la causa.
 
-## 9. Resumen final
+## 9. Issue de revisión
+El Action de render crea solo el issue **"Revisión · semana del <lunes>"** con una casilla y la vista previa
+de cada publicación. Si `gh` funciona en esta sesión, agrega en ese issue un comentario con el resumen del
+paso 10 (`gh issue comment <número> --body-file resumen.md`); si no, déjalo en tu respuesta final.
+
+## 10. Resumen final
 Escribe un resumen breve: qué se programó (fecha, tipo, tema), qué aprendiste del informe y
 cualquier cosa que el dueño de la cuenta deba revisar en la app (mensajes marcados para revisión),
 qué material conviene subir, y **una acción de crecimiento** de la estrategia §7 para esa semana.

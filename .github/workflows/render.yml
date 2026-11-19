@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: repo-writer
@@ -73,6 +74,14 @@ jobs:
             git pull --rebase origin main
           done
           exit 1
+
+      - name: Issue de revisión para el dueño
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          pip install -q requests
+          python scripts/review_issue.py || echo "::warning::No se pudo actualizar el issue de revisión"
 
       - name: Borrar la rama de Claude ya incorporada
         if: github.ref_name != 'main' && success()

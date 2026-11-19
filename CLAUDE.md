@@ -8,8 +8,10 @@ Claude crea el contenido una vez por semana; GitHub Actions hace el resto.
 | Pieza | Quién | Cuándo |
 |---|---|---|
 | Planificar y escribir la semana (`queue/*.json`) | Claude, con `/lote-semanal` | Domingo |
+| El dueño revisa en el issue "Revisión · semana del…" (desmarcar = no publicar; comentarios = cambios) | Dueño | Lunes hasta 13:30 |
+| Aplicar los cambios pedidos en el issue | Claude, con `/revision-lunes` | Lunes 13:30 |
 | Incorporar la cola + renderizar imágenes/videos | Action `render.yml` | Al subir una rama `claude/**` |
-| Publicar a la hora indicada | Action `publish.yml` | Cada 15 min |
+| Publicar a la hora indicada (solo lo marcado en la revisión) | Action `publish.yml` | Cada 15 min, desde el lunes 18:00 |
 | Responder comentarios y DMs (Gemini o Groq; textos anonimizados) | Action `inbox.yml` | Cada hora |
 | Informe con métricas (`reports/`) | Action `report.yml` | Domingo 18:00 Chile |
 | Revisar que todo siga conectado (avisa por correo si falla) | Action `check.yml` | Lunes |

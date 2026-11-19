@@ -38,7 +38,13 @@
       "13:00",
       "20:30"
     ],
-    "story_time": "11:00"
+    "story_time": "11:00",
+    "first_publish": {
+      "weekday": "monday",
+      "story": "18:00",
+      "post": "20:30"
+    },
+    "note": "El lunes se reserva para que el dueño revise: lo primero sale el lunes 18:00."
   },
   "openai_images": {
     "model": "gpt-image-2",
@@ -74,5 +80,10 @@
     "accent": "dorado",
     "card_bg": "rojo",
     "logo": "assets/brand/logo_crema.png"
+  },
+  "review": {
+    "enabled": true,
+    "default": "approve",
+    "changes_deadline": "lunes 13:30"
   }
 }

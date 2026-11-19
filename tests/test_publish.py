@@ -32,12 +32,16 @@ class FakeIG:
         return {"id": "M2", "permalink": "https://www.instagram.com/reel/xyz/"}
 
 
+DECISIONS: dict = {}
+
+
 @pytest.fixture
 def env(project, monkeypatch):
     FakeIG.fail, FakeIG.calls, FakeIG.extras = None, [], []
     monkeypatch.setenv("IG_ACCESS_TOKEN", "x")
     monkeypatch.setattr(publish_due, "client_from_env", lambda settings: FakeIG())
     monkeypatch.setattr(publish_due.hosting, "media_sha", lambda: "abc123")
+    monkeypatch.setattr(publish_due.review, "decisions", lambda: dict(DECISIONS))
     monkeypatch.setattr(publish_due.hosting, "reachable_url", lambda f, sha: f"https://cdn/{sha}/{f}")
     return project
 
@@ -94,3 +98,24 @@ def test_extras_location_collab_alt():
     assert publish_due.extras(item, {"location_id": 123}) == {
         "location_id": "123", "collaborators": "amiga,otra,x", "alt_text": "Jacuzzi en Providencia"}
     assert publish_due.extras({}, {"location_id": None}) == {}
+
+
+
+def test_unticked_in_review_is_cancelled(env):
+    DECISIONS["rechazada-1"] = False
+    try:
+        rendered("rechazada-1", datetime.now(timezone.utc) - timedelta(minutes=5))
+        publish_due.main()
+        data = q.load(config.QUEUE_DIR / "rechazada-1.json")
+        assert data["status"] == "cancelled" and not FakeIG.calls
+    finally:
+        DECISIONS.clear()
+
+
+def test_review_unavailable_publishes_nothing(env, monkeypatch):
+    def boom():
+        raise publish_due.review.ReviewUnavailable("sin red")
+    monkeypatch.setattr(publish_due.review, "decisions", boom)
+    rendered("espera-1", datetime.now(timezone.utc) - timedelta(minutes=5))
+    assert publish_due.main() == 0 and not FakeIG.calls
+    assert q.load(config.QUEUE_DIR / "espera-1.json")["status"] == "rendered"

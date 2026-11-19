@@ -7,7 +7,7 @@ import sys
 from datetime import datetime, timezone
 
 import _boot
-from autopilot import config, hosting
+from autopilot import config, hosting, review
 from autopilot import queue as q
 from autopilot.api import InstagramClient, InstagramError, client_from_env
 
@@ -63,6 +63,15 @@ def main() -> int:
         return 1
     ai = bool(settings.get("ai_generated_label", True))
     results = []
+    approvals: dict[str, bool] = {}
+    rcfg = review.settings()
+    if rcfg["enabled"]:
+        try:
+            approvals = review.decisions()
+        except review.ReviewUnavailable as exc:
+            # Sin saber qué aprobó el dueño no se publica: se reintenta en 15 minutos.
+            print(f"No se pudo leer la revisión ({exc}); se reintenta en la próxima vuelta.")
+            return 0
     count = 0
     for path, item, late in due:
         if late:
@@ -73,6 +82,14 @@ def main() -> int:
             continue
         if count >= pub.get("max_posts_per_run", 2):
             break
+        if rcfg["enabled"]:
+            approved = approvals.get(item["id"], rcfg["default"] == "approve")
+            if not approved:
+                item["status"] = "cancelled"
+                item["error"] = "No aprobada en la revisión semanal."
+                q.save(item)
+                results.append(f"- 🚫 {item['id']}: desmarcada en la revisión, no se publica")
+                continue
         try:
             if dry:
                 urls = [hosting.reachable_url(f, sha) for f in item["media"]["files"]]
