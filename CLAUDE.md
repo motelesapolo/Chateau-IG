@@ -13,8 +13,10 @@ Claude crea el contenido una vez por semana; GitHub Actions hace el resto.
 | Responder comentarios y DMs (Gemini o Groq; textos anonimizados) | Action `inbox.yml` | Cada hora |
 | Informe con métricas (`reports/`) | Action `report.yml` | Domingo 18:00 Chile |
 | Revisar que todo siga conectado (avisa por correo si falla) | Action `check.yml` | Lunes |
+| Preparar fotos/videos que sube el dueño a `material/` (HEIC→JPG, sin GPS) | Action `material.yml` | Al subir material |
 
 - El formato de cada publicación está documentado arriba de `autopilot/queue.py`. Léelo antes de escribir la cola.
+- Fotos y videos reales del hotel: `material/` (ver `material/README.md`). Inventario: `python scripts/material.py inventario`.
 - Identidad, voz y reglas de la cuenta: `config/persona.md`. Ajustes: `config/settings.json`.
 - Los archivos pesados viven en la rama `media` (se reescribe sola). En `main` solo queda `media/<id>/preview.jpg`.
 
@@ -27,7 +29,8 @@ Claude crea el contenido una vez por semana; GitHub Actions hace el resto.
    No hace falta (ni conviene) empujar directo a `main`.
 5. No edites `published/` ni publicaciones con status `rendered` salvo para corregir un error grave
    (en ese caso agrega `"replace": true`).
-6. Contenido: nada de personas reales identificables, logos o personajes con derechos de autor,
+6. Para mostrar las habitaciones o el hotel usa SOLO material real de `material/`, nunca IA ni stock.
+7. Contenido: nada de personas reales identificables, logos o personajes con derechos de autor,
    consejos médicos/financieros como si fueran de un profesional, ni datos inventados presentados como hechos.
    Si la persona de la cuenta es un personaje generado por IA, nunca lo presentes como humano real.
 

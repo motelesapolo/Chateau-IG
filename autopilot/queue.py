@@ -24,7 +24,8 @@ Fuentes de `visual`:
   pixabay_photo  {"query": "..."}  pixabay_video {"query": "..."}   stock gratis (PIXABAY_KEY)
   pexels_photo   {"query": "..."}  pexels_video  {"query": "..."}   stock gratis (PEXELS_KEY)
   card           {"bg": "#101820", "bg2": "#2b5876"}      fondo de color/degradado para frases
-  file           {"path": "assets/images/foto.jpg"}        archivo del repo
+  file           {"path": "material/habitaciones/jacuzzi/foto.jpg"}  foto o video real del hotel
+                 (también sirve assets/...). Para mostrar habitaciones SIEMPRE material propio.
 """
 from __future__ import annotations
 
