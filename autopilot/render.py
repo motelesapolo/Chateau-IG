@@ -213,20 +213,34 @@ def _pexels(vis: dict, kind: str, dest_dir: Path, seed: int) -> Path:
     return download(best["link"], dest_dir / f"pexels_{hit['id']}.mp4")
 
 
-def _hex(color: str) -> tuple[int, int, int]:
-    color = color.lstrip("#")
-    return tuple(int(color[i:i + 2], 16) for i in (0, 2, 4))  # type: ignore[return-value]
+def _hex(value: str) -> tuple[int, int, int]:
+    value = value.lstrip("#")
+    return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))  # type: ignore[return-value]
 
 
 def _card(vis: dict, size: tuple[int, int], dest: Path) -> Path:
-    top = _hex(vis.get("bg", "#14213d"))
-    bottom = _hex(vis.get("bg2", vis.get("bg", "#1f4068")))
+    """Fondo liso o degradado con la paleta de la marca; `logo: true` agrega el logo arriba."""
+    bg = vis.get("bg", brand()["card_bg"])
+    top, bottom = color(bg), color(vis.get("bg2", bg))
     w, h = size
     grad = Image.new("RGB", (1, h))
     for y in range(h):
         t = y / max(h - 1, 1)
         grad.putpixel((0, y), tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3)))
-    grad.resize((w, h)).save(dest, quality=95)
+    img = grad.resize((w, h))
+    if vis.get("logo"):
+        logo_file = config.ROOT / brand()["logo"]
+        if logo_file.is_file():
+            logo = Image.open(logo_file).convert("RGBA")
+            if is_light(bg):  # sobre fondo claro, el logo va en rojo
+                tint = Image.new("RGBA", logo.size, (*color("rojo"), 255))
+                tint.putalpha(logo.getchannel("A"))
+                logo = tint
+            logo.thumbnail((int(w * 0.46), int(h * 0.2)), Image.LANCZOS)
+            pos = vis.get("logo_position", "top")
+            ly = {"top": int(h * 0.07), "center": (h - logo.height) // 2}.get(pos, h - logo.height - int(h * 0.06))
+            img.paste(logo, ((w - logo.width) // 2, ly), logo)
+    img.save(dest, quality=95)
     return dest
 
 
@@ -250,13 +264,38 @@ def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int) -> 
 
 
 # ---------------------------------------------------------------------- texto
-_FONT_CACHE: dict[int, ImageFont.FreeTypeFont] = {}
+_FONT_CACHE: dict[tuple, ImageFont.FreeTypeFont] = {}
+BRAND_DEFAULTS = {
+    "colors": {"rojo": "#811721", "crema": "#FCF1E1", "beige": "#F3D8B9", "arena": "#F5DFC5",
+               "dorado": "#9C6A2B", "cafe": "#2A1C14"},
+    "title_font": "TulpenOne-Regular.ttf", "title_weight": None, "title_stroke": 0.022, "title_tracking": 0.07,
+    "body_font": "Manrope[wght].ttf", "body_weight": "SemiBold",
+    "box": "rojo", "box_alpha": 185, "text": "crema", "text_on_light": "rojo", "accent": "dorado",
+    "card_bg": "rojo", "logo": "assets/brand/logo_crema.png",
+}
 
 
-def font_path() -> str | None:
-    custom = sorted((config.ASSETS_DIR / "fonts").glob("*.[ot]tf")) if (config.ASSETS_DIR / "fonts").is_dir() else []
-    if custom:
-        return str(custom[0])
+def brand() -> dict:
+    try:
+        custom = config.load_settings().get("brand") or {}
+    except Exception:  # noqa: BLE001
+        custom = {}
+    out = {**BRAND_DEFAULTS, **custom}
+    out["colors"] = {**BRAND_DEFAULTS["colors"], **(custom.get("colors") or {})}
+    return out
+
+
+def color(value: str | None, default: str = "crema") -> tuple[int, int, int]:
+    """Acepta un nombre de la paleta (rojo, crema, beige, dorado...) o un #hex."""
+    value = value or default
+    return _hex(brand()["colors"].get(value, value))
+
+
+def font_path(role: str = "body") -> str | None:
+    fonts = config.ASSETS_DIR / "fonts"
+    wanted = brand().get(f"{role}_font")
+    if wanted and (fonts / wanted).is_file():
+        return str(fonts / wanted)
     for pattern, must in (("Montserrat:style=ExtraBold", "montserrat"),
                           ("Montserrat:style=Bold", "montserrat"),
                           ("DejaVu Sans:style=Bold", "dejavu")):
@@ -270,21 +309,22 @@ def font_path() -> str | None:
     return None
 
 
-def get_font(size: int):
-    if size not in _FONT_CACHE:
-        path = font_path()
+def get_font(size: int, role: str = "body"):
+    key = (size, role)
+    if key not in _FONT_CACHE:
+        path = font_path(role)
         font = ImageFont.truetype(path, size) if path else ImageFont.load_default(size)
-        # Fuentes variables (p. ej. Montserrat[wght].ttf): forzar un peso grueso y legible.
+        # Fuentes variables: forzar el peso de la marca (o uno grueso y legible).
         try:
             names = [n.decode() if isinstance(n, bytes) else n for n in font.get_variation_names()]
-            for wanted in ("ExtraBold", "Bold", "Black"):
-                if wanted in names:
+            for wanted in (brand().get(f"{role}_weight"), "SemiBold", "Bold", "ExtraBold"):
+                if wanted and wanted in names:
                     font.set_variation_by_name(wanted)
                     break
         except (OSError, AttributeError):
             pass
-        _FONT_CACHE[size] = font
-    return _FONT_CACHE[size]
+        _FONT_CACHE[key] = font
+    return _FONT_CACHE[key]
 
 
 _EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF"
@@ -296,18 +336,22 @@ def clean_overlay_text(text: str) -> str:
     return re.sub(r"[ \t]{2,}", " ", _EMOJI_RE.sub("", text or "")).strip()
 
 
-def is_light(color: str) -> bool:
-    r, g, b = _hex(color)
+def is_light(value: str) -> bool:
+    r, g, b = color(value)
     return (0.299 * r + 0.587 * g + 0.114 * b) > 160
 
 
-def _wrap(text: str, font, max_width: int) -> list[str]:
+def _tracked_len(line: str, font, tracking: float) -> float:
+    return font.getlength(line) + max(len(line) - 1, 0) * tracking
+
+
+def _wrap(text: str, font, max_width: int, tracking: float = 0.0) -> list[str]:
     lines: list[str] = []
     for paragraph in text.split("\n"):
         words, cur = paragraph.split(), ""
         for word in words:
             trial = f"{cur} {word}".strip()
-            if font.getlength(trial) <= max_width or not cur:
+            if _tracked_len(trial, font, tracking) <= max_width or not cur:
                 cur = trial
             else:
                 lines.append(cur)
@@ -316,57 +360,110 @@ def _wrap(text: str, font, max_width: int) -> list[str]:
     return lines
 
 
+def _draw_line(draw, x: float, y: float, line: str, font, fill, tracking: float, stroke: int,
+               stroke_fill) -> None:
+    if not tracking:
+        draw.text((x, y), line, font=font, fill=fill, stroke_width=stroke, stroke_fill=stroke_fill)
+        return
+    for ch in line:
+        draw.text((x, y), ch, font=font, fill=fill, stroke_width=stroke, stroke_fill=stroke_fill)
+        x += font.getlength(ch) + tracking
+
+
+def _fit_block(text: str, role: str, start: int, max_w: int, max_lines: int, min_size: int):
+    b = brand()
+    fsize = start
+    while True:
+        font = get_font(fsize, role)
+        tracking = fsize * b["title_tracking"] if role == "title" else 0.0
+        lines = _wrap(text, font, max_w, tracking)
+        if (len(lines) <= max_lines and all(_tracked_len(l, font, tracking) <= max_w for l in lines)) \
+                or fsize <= min_size:
+            return font, fsize, tracking, lines
+        fsize -= 6
+
+
 def text_overlay(text: str, size: tuple[int, int], position: str = "center",
-                 boxed: bool = True, dark_text: bool = False) -> Image.Image:
-    """PNG transparente del tamaño del lienzo con el texto grande y legible."""
+                 boxed: bool = True, dark_text: bool = False, subtext: str = "",
+                 style: str = "auto", divider: bool = False) -> Image.Image:
+    """PNG transparente con el texto en el estilo de la marca.
+
+    - Títulos cortos (<= 48 letras): tipografía de títulos (art déco), en mayúsculas y espaciada.
+    - Textos largos o `style: "body"`: tipografía simple.
+    - `subtext`: línea secundaria más chica con la tipografía simple.
+    """
+    b = brand()
     w, h = size
     layer = Image.new("RGBA", size, (0, 0, 0, 0))
-    text = clean_overlay_text(text)
-    if not text:
+    text, subtext = clean_overlay_text(text), clean_overlay_text(subtext)
+    if not text and not subtext:
         return layer
+    role = style if style in {"title", "body"} else ("title" if len(text) <= 48 else "body")
+    if role == "title":
+        text = text.upper()
     max_w = int(w * 0.80)
-    fsize = 96 if len(text) < 40 else 80 if len(text) < 80 else 64
-    while True:
-        font = get_font(fsize)
-        lines = _wrap(text, font, max_w)
-        if (len(lines) <= 6 and all(font.getlength(line) <= max_w for line in lines)) or fsize <= 40:
-            break
-        fsize -= 6
-    ascent, descent = font.getmetrics()
-    line_h = int((ascent + descent) * 1.12)
-    block_h = line_h * len(lines)
-    block_w = max(int(font.getlength(line)) for line in lines)
+    blocks = []
+    if text:
+        start = (190 if len(text) < 18 else 160 if len(text) < 32 else 130) if role == "title" else \
+                (80 if len(text) < 80 else 64)
+        font, fsize, tracking, lines = _fit_block(text, role, start, max_w, 4 if role == "title" else 6, 44)
+        stroke = max(1, int(fsize * b["title_stroke"])) if role == "title" else 0
+        blocks.append((font, fsize, tracking, lines, stroke, 1.02 if role == "title" else 1.15))
+    if subtext:
+        font, fsize, tracking, lines = _fit_block(subtext, "body", 52, max_w, 3, 34)
+        blocks.append((font, fsize, 0.0, lines, 0, 1.2))
+    gap = 28 if len(blocks) == 2 else 0
+    heights = []
+    for font, fsize, tracking, lines, stroke, lh in blocks:
+        ascent, descent = font.getmetrics()
+        heights.append(int((ascent + descent) * lh))
+    block_h = sum(hgt * len(bl[3]) for hgt, bl in zip(heights, blocks)) + gap + (40 if divider else 0)
+    block_w = max(int(_tracked_len(l, bl[0], bl[2])) for bl in blocks for l in bl[3])
     centers = {"top": 0.20, "upper": 0.30, "center": 0.50, "lower": 0.72, "bottom": 0.78}
     cy = int(h * centers.get(position, 0.5))
-    y0 = max(int(h * 0.10), cy - block_h // 2)
+    y = max(int(h * 0.10), cy - block_h // 2)
     draw = ImageDraw.Draw(layer)
     if boxed:
-        pad = int(fsize * 0.45)
-        draw.rounded_rectangle([(w - block_w) // 2 - pad, y0 - pad,
-                                (w + block_w) // 2 + pad, y0 + block_h + pad // 2],
-                               radius=pad, fill=(0, 0, 0, 150))
-    for i, line in enumerate(lines):
-        lw = font.getlength(line)
-        if dark_text:
-            draw.text(((w - lw) / 2, y0 + i * line_h), line, font=font, fill=(26, 26, 26, 255))
-        else:
-            draw.text(((w - lw) / 2, y0 + i * line_h), line, font=font, fill=(255, 255, 255, 255),
-                      stroke_width=max(2, fsize // 24), stroke_fill=(0, 0, 0, 200))
+        pad = 46
+        draw.rounded_rectangle([(w - block_w) // 2 - pad, y - pad, (w + block_w) // 2 + pad, y + block_h + pad],
+                               radius=28, fill=(*color(b["box"]), int(b["box_alpha"])))
+    main = color(b["text_on_light"] if dark_text else b["text"])
+    second = color("cafe") if dark_text else main
+    for k, ((font, fsize, tracking, lines, stroke, _), lh) in enumerate(zip(blocks, heights)):
+        if k == 1:
+            y += gap
+        fill = (*(main if k == 0 and text else second), 255)
+        for line in lines:
+            lw = _tracked_len(line, font, tracking)
+            _draw_line(draw, (w - lw) / 2, y, line, font, fill, tracking, stroke, fill)
+            y += lh
+        if k == 0 and divider:
+            gold = (*color(b["accent"]), 255)
+            y += 14
+            half = min(block_w, int(w * 0.5)) // 2
+            draw.line([(w / 2 - half, y), (w / 2 + half, y)], fill=gold, width=3)
+            draw.polygon([(w / 2, y - 8), (w / 2 + 8, y), (w / 2, y + 8), (w / 2 - 8, y)], fill=gold)
+            y += 26
     return layer
 
 
 def overlay_for(scene: dict, size: tuple[int, int]) -> Image.Image:
     vis = scene["visual"]
     is_card = vis["source"] == "card"
-    dark = is_card and is_light(vis.get("bg", "#14213d")) and is_light(vis.get("bg2", vis.get("bg", "#14213d")))
+    bg = vis.get("bg", brand()["card_bg"])
+    dark = is_card and is_light(bg) and is_light(vis.get("bg2", bg))
     return text_overlay(scene.get("text", ""), size, default_position(scene, size),
-                        boxed=not is_card, dark_text=dark)
+                        boxed=not is_card, dark_text=dark, subtext=scene.get("subtext", ""),
+                        style=scene.get("style", "auto"), divider=is_card and bool(scene.get("text")))
 
 
 def default_position(scene: dict, size: tuple[int, int]) -> str:
     if scene.get("text_position"):
         return scene["text_position"]
     if scene["visual"]["source"] == "card":
+        vis = scene["visual"]
+        if vis.get("logo") and vis.get("logo_position", "top") == "bottom":
+            return "upper"
         return "center"
     return "upper" if size == VERTICAL else "lower"
 
@@ -397,8 +494,14 @@ def tts(text: str, voice: str, rate: str, dest: Path) -> Path | None:
 
 
 # -------------------------------------------------------------------- video
+def has_audio(path: Path) -> bool:
+    out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=index",
+                          "-of", "csv=p=0", str(path)], capture_output=True, text=True)
+    return bool(out.stdout.strip())
+
+
 def scene_clip(src: Path, kind: str, overlay_png: Path, audio: Path | None, duration: float,
-               dest: Path, zoom_in: bool = True) -> Path:
+               dest: Path, zoom_in: bool = True, keep_audio: bool = False) -> Path:
     w, h = VERTICAL
     frames = int(round(duration * 30))
     cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
@@ -419,6 +522,9 @@ def scene_clip(src: Path, kind: str, overlay_png: Path, audio: Path | None, dura
     if audio:
         cmd += ["-i", str(audio)]
         achain = "[2:a]aresample=44100,aformat=channel_layouts=stereo,apad[a]"
+    elif keep_audio and kind == "video" and has_audio(src):
+        cmd += ["-f", "lavfi", "-t", f"{duration:.3f}", "-i", "anullsrc=r=44100:cl=stereo"]
+        achain = "[0:a]aresample=44100,aformat=channel_layouts=stereo,apad[a]"
     else:
         cmd += ["-f", "lavfi", "-t", f"{duration:.3f}", "-i", "anullsrc=r=44100:cl=stereo"]
         achain = "[2:a]anull[a]"
@@ -478,7 +584,7 @@ def contact_sheet(images: list[Path], dest: Path, title: str) -> Path:
     ch = max(t.height for t in thumbs)
     sheet = Image.new("RGB", (cols * (cw + 12) + 12, rows * (ch + 12) + 70), (24, 24, 24))
     draw = ImageDraw.Draw(sheet)
-    draw.text((14, 16), title[:90], fill=(240, 240, 240), font=get_font(30))
+    draw.text((14, 16), title[:90], fill=(240, 240, 240), font=get_font(30, "body"))
     for i, t in enumerate(thumbs):
         r, c = divmod(i, cols)
         sheet.paste(t, (12 + c * (cw + 12), 64 + r * (ch + 12)))
@@ -523,11 +629,14 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
             overlay = work / f"overlay_{i}.png"
             overlay_for(scene, VERTICAL).save(overlay)
             audio = tts(scene.get("narration", ""), voice, rate, work / f"voice_{i}.mp3")
-            dur = float(scene.get("duration", 4))
+            if scene.get("duration") is None and kind == "video":
+                dur = min(media_duration(src) or 4.0, 90.0)  # video propio: se usa completo
+            else:
+                dur = float(scene.get("duration", 4))
             if audio:
                 dur = max(dur, media_duration(audio) + 0.35)
             clip = scene_clip(src, kind, overlay, audio, dur, work / f"clip_{i:02d}.mp4",
-                              zoom_in=i % 2 == 1)
+                              zoom_in=i % 2 == 1, keep_audio=bool(scene.get("keep_audio")))
             clips.append(clip)
             mids.append(elapsed + dur / 2)
             elapsed += dur
@@ -535,8 +644,16 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
         name = "story.mp4" if t == "story" else "reel.mp4"
         video = finalize_video(clips, music, float(settings.get("music_volume", 0.12)),
                                out_dir / name, work)
-        cover = frame_at(video, min(1.0, elapsed / 2), out_dir / "cover.jpg")
+        if item.get("cover"):  # portada propia (material/portadas/...), ajustada a 9:16
+            cimg = ImageOps.fit(ImageOps.exif_transpose(Image.open(config.ROOT / item["cover"])).convert("RGB"),
+                                VERTICAL, Image.LANCZOS)
+            cover = out_dir / "cover.jpg"
+            cimg.save(cover, quality=92)
+        else:
+            cover = frame_at(video, min(1.0, elapsed / 2), out_dir / "cover.jpg")
         frames = [frame_at(video, m, work / f"mid_{k}.jpg") for k, m in enumerate(mids)]
+        if item.get("cover"):
+            frames.insert(0, cover)
         preview = contact_sheet(frames, out_dir / "preview.jpg",
                                 f"{item['id']} · {t} · {media_duration(video):.0f}s")
         return {"kind": "video", "files": [rel(video)], "cover": rel(cover),

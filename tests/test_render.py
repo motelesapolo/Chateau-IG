@@ -117,3 +117,17 @@ def test_ai_image_uses_pollinations_when_openai_fails(tmp_path, monkeypatch):
     monkeypatch.setattr(render, "_openai", lambda *a, **k: (_ for _ in ()).throw(render.RenderError("sin saldo")))
     monkeypatch.setattr(render, "_pollinations", lambda vis, size, dest, seed: dest)
     assert render.ai_image({"prompt": "p"}, render.FEED, tmp_path / "b.jpg", 1) == tmp_path / "b.jpg"
+
+
+
+def test_brand_colors_by_name_and_hex():
+    from autopilot import render
+    assert render.color("rojo") == (0x81, 0x17, 0x21)
+    assert render.color("#000000") == (0, 0, 0)
+    assert render.is_light("beige") and not render.is_light("rojo")
+
+
+def test_brand_overlay_draws_title_and_subtext():
+    from autopilot import render
+    layer = render.text_overlay("Promo 6x3", render.VERTICAL, subtext="Pagas 3 y te quedas 6")
+    assert layer.getbbox() is not None

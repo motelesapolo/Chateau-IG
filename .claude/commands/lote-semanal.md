@@ -7,7 +7,7 @@ Eres quien maneja esta cuenta de Instagram. Prepara el lote de contenido de la *
 paso 1 falle. Al final deja un resumen corto.
 
 ## 1. Revisar que se puede trabajar
-- Lee `CLAUDE.md`, `config/persona.md`, **`config/estrategia.md`** (cómo crecer: formatos, horarios, SEO, CTA),
+- Lee `CLAUDE.md`, `config/persona.md`, **`config/marca.md`** (paleta, tipografías, logo), **`config/estrategia.md`** (cómo crecer: formatos, horarios, SEO, CTA),
   `config/settings.json` y la cabecera de `autopilot/queue.py`.
 - Si `config/persona.md` todavía tiene `[COMPLETAR`, **detente** y explica qué falta completar.
 - `git fetch origin main && git checkout -B trabajo origin/main` para partir de lo último.
@@ -50,10 +50,17 @@ Reglas de calidad:
 - **Imágenes:** una idea fuerte, texto corto encima o ninguno.
 - **Historias (1 diaria):** avisos del post del día, preguntas, detrás de escena. Imagen con texto corto.
 - **Visuales:**
+  - **Prioridad:** 1) `material/listos/` (se publica tal cual) · 2) fotos y videos propios de `material/`
+    (videos con `keep_audio: true` y sin `duration` si se usan completos) · 3) tarjetas `card` con la paleta
+    de `config/marca.md` (`bg`: rojo/beige/arena, `logo: true`) · 4) IA solo si falta material de ambiente.
+  - Portadas: si hay una que calce en `material/portadas/`, úsala con `"cover"`. Si falta, anota en el resumen
+    qué portadas conviene que el dueño haga (tema y texto sugerido).
+  - Cierra cada reel con una tarjeta roja con el logo al centro (`"logo": true, "logo_position": "center"`, 2 s).
+  - Textos sobre la imagen: título corto (máx. 7 palabras) en `text` y, si hace falta, detalle en `subtext`.
   - `ia` (imagen IA; usa OpenAI si está la clave, si no Pollinations): `prompt` en **inglés** escrito como
     foto de revista: sujeto concreto, materiales, luz (warm tungsten, candlelight, golden hour), lente
     (35mm, shallow depth of field), encuadre vertical, paleta (deep burgundy, warm gold, soft cream).
-    Misma paleta toda la semana para que el perfil se vea coherente. Solo ambientes y detalles genéricos
+    Paleta de la marca (burgundy red, warm cream, beige, muted gold) para que el perfil se vea coherente. Solo ambientes y detalles genéricos
     (velas, copas, sábanas, vapor, ciudad de noche); **nunca** para representar el hotel o sus habitaciones.
     Nada de personas reales, logos, marcas, texto dentro de la imagen ni nada sugerente.
     `"quality": "high"` solo para la portada o el gancho del reel más importante de la semana.

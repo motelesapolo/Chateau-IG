@@ -12,6 +12,8 @@ Aquí van las **fotos y videos reales** de Le Chateau. Claude los usa en las pub
 | `espacios/` | Fachada, recepción, pasillos, estacionamiento, detalles del edificio |
 | `servicios/` | Cortesía (pisco sour, mango sour), pizzas, bar, desayuno, toallas, amenidades |
 | `otros/` | Cualquier otra cosa (fechas especiales, decoraciones, etc.) |
+| `portadas/` | Portadas de reels hechas por ti (9:16, lo importante al centro) |
+| `listos/` | Videos o diseños terminados que se publican tal cual |
 
 ## Cómo subir (desde el computador)
 1. Entra a la carpeta que corresponda aquí en GitHub (por ejemplo `habitaciones` → `jacuzzi`).
@@ -27,6 +29,11 @@ y **borra los metadatos** (ubicación GPS, modelo del celular). No hace falta pr
 - **Vertical** (como una historia) siempre que puedas. Fotos con buena luz: abre cortinas, enciende luces cálidas.
 - Videos cortos de 5 a 15 segundos, moviendo el celular lento. Mejor varios clips cortos que uno largo.
 - Habitaciones ordenadas y limpias: cama hecha, toallas dobladas, sin objetos personales.
+
+## Si editas las fotos con ChatGPT u otra IA
+Mejorar luz, color y nitidez está perfecto. **No** agregues ni quites cosas de las habitaciones
+(muebles, jacuzzi, vista, decoración) ni las hagas ver más grandes: el cliente tiene que encontrar
+lo mismo que vio. Revisa que la IA no haya cambiado detalles sin querer (cuadros, lámparas, cortinas).
 
 ## ⚠️ No subir
 - **Personas reconocibles** (clientes, personal), aunque sea de espalda o en un reflejo.

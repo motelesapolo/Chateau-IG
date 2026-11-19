@@ -11,11 +11,15 @@ Formato (lo escribe Claude en el lote semanal):
     {
       "visual": {"source": "pollinations", "prompt": "..."},
       "text": "Texto grande sobre la imagen (opcional)",
+      "subtext": "Línea secundaria más chica (opcional)",
+      "style": "auto" | "title" | "body",      # auto: textos cortos con la tipografía del logo
       "narration": "Lo que dice la voz en off (solo reels/historias de video)",
-      "duration": 4                          # segundos (reels/historias de video)
+      "duration": 4,                         # segundos; en un video propio se puede omitir (se usa completo)
+      "keep_audio": true                     # video propio: conservar su sonido (si no hay narración)
     }
   ],
   "music": "assets/music/archivo.mp3",       # opcional
+  "cover": "material/portadas/archivo.jpg",  # opcional: portada propia del reel (se ajusta a 9:16)
   "collaborators": ["cuenta_aliada"],        # opcional: post en colaboración (hasta 3 cuentas)
   "alt_text": "Descripción de la imagen",    # opcional: accesibilidad y búsqueda (imagen/carrusel)
   "status": "planned"                        # planned → rendered → published
@@ -28,7 +32,9 @@ Fuentes de `visual`:
                  Nunca para mostrar las habitaciones o el hotel: eso SOLO con "file" (material real).
   pixabay_photo  {"query": "..."}  pixabay_video {"query": "..."}   stock gratis (PIXABAY_KEY)
   pexels_photo   {"query": "..."}  pexels_video  {"query": "..."}   stock gratis (PEXELS_KEY)
-  card           {"bg": "#101820", "bg2": "#2b5876"}      fondo de color/degradado para frases
+  card           {"bg": "rojo", "bg2": "rojo", "logo": true}   fondo con la paleta de la marca para frases.
+                 Colores: rojo, crema, beige, arena, dorado, cafe (o #hex). "logo": true pone el logo arriba
+                 ("logo_position": "top" | "center" | "bottom"). Sobre fondo claro el texto va en rojo.
   file           {"path": "material/habitaciones/jacuzzi/foto.jpg"}  foto o video real del hotel
                  (también sirve assets/...). Para mostrar habitaciones SIEMPRE material propio.
 """
@@ -83,8 +89,34 @@ def published_ids() -> set[str]:
     return {p.stem for p in config.PUBLISHED_DIR.glob("*.json")}
 
 
+VIDEO_EXT = {".mp4", ".mov", ".m4v", ".webm"}
+
+
+def own_video(scene: dict) -> Path | None:
+    vis = scene.get("visual") or {}
+    if vis.get("source") == "file" and Path(str(vis.get("path", ""))).suffix.lower() in VIDEO_EXT:
+        return config.ROOT / vis["path"]
+    return None
+
+
+def _probe(path: Path) -> float:
+    import subprocess
+    try:
+        out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                              "-of", "default=nw=1:nk=1", str(path)], capture_output=True, text=True, timeout=30)
+        return float(out.stdout.strip())
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return 4.0
+
+
+def scene_duration(scene: dict) -> float:
+    if scene.get("duration") is None and (video := own_video(scene)) and video.is_file():
+        return min(_probe(video), 90.0)
+    return float(scene.get("duration", 4))
+
+
 def total_duration(item: dict) -> float:
-    return sum(float(s.get("duration", 4)) for s in item.get("scenes", []))
+    return sum(scene_duration(s) for s in item.get("scenes", []))
 
 
 def validate(item: dict) -> list[str]:
@@ -148,10 +180,13 @@ def validate(item: dict) -> list[str]:
             errs.append(f"escena {i}: un {t} no puede usar video")
         if len(scene.get("text", "")) > 140:
             errs.append(f"escena {i}: text muy largo para leerse en pantalla (máx. 140)")
-        dur = scene.get("duration", 4)
-        if not isinstance(dur, (int, float)) or not 1 <= dur <= 30:
-            errs.append(f"escena {i}: duration debe estar entre 1 y 30")
+        dur = scene.get("duration", None if own_video(scene) else 4)
+        if dur is not None and (not isinstance(dur, (int, float)) or not 1 <= dur <= 90):
+            errs.append(f"escena {i}: duration debe estar entre 1 y 90")
 
+    cover = item.get("cover")
+    if cover and not (config.ROOT / cover).is_file():
+        errs.append(f"no existe la portada {cover}")
     music = item.get("music")
     if music and not (config.ROOT / music).is_file():
         errs.append(f"no existe la música {music}")
@@ -163,7 +198,8 @@ def is_video(item: dict) -> bool:
         return True
     if item["type"] == "story":
         s = item["scenes"][0]
-        return bool(s.get("narration")) or s.get("visual", {}).get("source", "").endswith("_video")
+        return (bool(s.get("narration")) or s.get("visual", {}).get("source", "").endswith("_video")
+                or own_video(s) is not None)
     return False
 
 

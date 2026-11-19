@@ -48,5 +48,25 @@
     ],
     "quality": "medium",
     "max_per_run": 40
+  },
+  "brand": {
+    "colors": {
+      "rojo": "#811721",
+      "crema": "#FCF1E1",
+      "beige": "#F3D8B9",
+      "arena": "#F5DFC5",
+      "dorado": "#9C6A2B",
+      "cafe": "#2A1C14"
+    },
+    "title_font": "TulpenOne-Regular.ttf",
+    "body_font": "Manrope[wght].ttf",
+    "body_weight": "SemiBold",
+    "box": "rojo",
+    "box_alpha": 185,
+    "text": "crema",
+    "text_on_light": "rojo",
+    "accent": "dorado",
+    "card_bg": "rojo",
+    "logo": "assets/brand/logo_crema.png"
   }
 }
