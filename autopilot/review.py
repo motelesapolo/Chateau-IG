@@ -108,6 +108,12 @@ class GitHub:
     def update(self, number: int, body: str) -> dict:
         return self._req("PATCH", f"issues/{number}", json={"body": body})
 
+    def comments(self, number: int) -> list[dict]:
+        return self._req("GET", f"issues/{number}/comments", params={"per_page": 100})
+
+    def comment(self, number: int, body: str) -> dict:
+        return self._req("POST", f"issues/{number}/comments", json={"body": body})
+
     def close(self, number: int) -> dict:
         return self._req("PATCH", f"issues/{number}", json={"state": "closed"})
 
@@ -147,4 +153,31 @@ def sync_issues(now: datetime, gh: GitHub | None = None) -> list[str]:
         if monday < this_monday and monday not in weeks:
             gh.close(issue["number"])
             done.append(f"#{issue['number']} cerrado")
+    return done
+
+
+REPLY_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-.+\.md$")
+
+
+def post_replies(gh: GitHub | None = None) -> list[str]:
+    """Publica en el issue de su semana los mensajes de Claude guardados en reviews/<lunes>-<nombre>.md.
+
+    Claude no tiene permiso para comentar en GitHub: deja el texto en el repo y este paso lo publica una vez.
+    """
+    gh = gh or GitHub()
+    folder = config.ROOT / "reviews"
+    if not folder.is_dir():
+        return []
+    issues = {MARK_RE.search(i["body"]).group(1): i for i in gh.review_issues()}
+    done = []
+    for path in sorted(folder.glob("*.md")):
+        m = REPLY_RE.match(path.name)
+        if not m or m.group(1) not in issues:
+            continue
+        issue = issues[m.group(1)]
+        marker = f"<!-- reply:{path.name} -->"
+        if any(marker in (c.get("body") or "") for c in gh.comments(issue["number"])):
+            continue
+        gh.comment(issue["number"], f"{marker}\n🤖 {path.read_text(encoding='utf-8').strip()}")
+        done.append(f"comentario {path.name} en #{issue['number']}")
     return done

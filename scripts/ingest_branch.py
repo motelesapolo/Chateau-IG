@@ -21,12 +21,13 @@ def git_bytes(*args: str) -> bytes:
 
 
 def main(ref: str) -> int:
-    names = git_bytes("ls-tree", "-r", "--name-only", ref, "--", "queue", "assets").decode().splitlines()
+    names = git_bytes("ls-tree", "-r", "--name-only", ref, "--", "queue", "assets", "reviews").decode().splitlines()
     published = q.published_ids()
     added, skipped, invalid, assets = [], [], [], 0
 
     for name in names:
-        if name.startswith("assets/"):
+        # reviews/*.md: mensajes de Claude para el issue de revisión (los publica scripts/review_issue.py)
+        if name.startswith("assets/") or (name.startswith("reviews/") and name.endswith(".md")):
             data = git_bytes("show", f"{ref}:{name}")
             dest = config.ROOT / name
             if not dest.exists() or dest.read_bytes() != data:

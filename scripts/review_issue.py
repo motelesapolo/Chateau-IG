@@ -15,6 +15,7 @@ def main() -> int:
         return 0
     try:
         done = review.sync_issues(datetime.now(timezone.utc))
+        done += review.post_replies()
     except review.ReviewUnavailable as exc:
         print(f"No se pudo crear el issue de revisión: {exc}")
         return 1

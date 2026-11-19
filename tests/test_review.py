@@ -23,3 +23,31 @@ def test_build_body_keeps_previous_choices():
 def test_week_monday_uses_chile_time():
     # domingo 23:30 en Chile = lunes 02:30 UTC: sigue siendo la semana anterior
     assert str(review.week_monday(datetime(2026, 11, 30, 2, 30, tzinfo=timezone.utc))) == "2026-11-23"
+
+
+class FakeGH:
+    repo = "dueno/repo"
+
+    def __init__(self):
+        self.posted = []
+
+    def review_issues(self):
+        return [{"number": 7, "body": "<!-- review:2026-11-23 -->\n- [x] `a-1`"}]
+
+    def comments(self, number):
+        return [{"body": "<!-- reply:2026-11-23-viejo.md -->\n🤖 ya"}]
+
+    def comment(self, number, body):
+        self.posted.append((number, body))
+
+
+def test_post_replies_once(project):
+    folder = project / "reviews"
+    folder.mkdir()
+    (folder / "2026-11-23-resumen.md").write_text("Semana lista")
+    (folder / "2026-11-23-viejo.md").write_text("ya publicado")
+    (folder / "2026-11-30-otra.md").write_text("sin issue todavía")
+    gh = FakeGH()
+    done = review.post_replies(gh)
+    assert gh.posted == [(7, "<!-- reply:2026-11-23-resumen.md -->\n🤖 Semana lista")]
+    assert len(done) == 1

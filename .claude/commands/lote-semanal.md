@@ -87,7 +87,7 @@ Luego ejecuta `python scripts/validate_queue.py` y corrige hasta que todo esté 
 ## 7. Subir
 ```bash
 git checkout -b claude/lote-<AAAA-MM-DD del lunes>
-git add queue && git commit -m "Lote semanal <fecha>" && git push -u origin HEAD
+git add queue reviews && git commit -m "Lote semanal <fecha>" && git push -u origin HEAD
 ```
 El Action **1 · Renderizar contenido** incorpora la cola a `main`, genera imágenes/videos y borra la rama.
 
@@ -104,8 +104,8 @@ El Action **1 · Renderizar contenido** incorpora la cola a `main`, genera imág
 
 ## 9. Issue de revisión
 El Action de render crea solo el issue **"Revisión · semana del <lunes>"** con una casilla y la vista previa
-de cada publicación. Si `gh` funciona en esta sesión, agrega en ese issue un comentario con el resumen del
-paso 10 (`gh issue comment <número> --body-file resumen.md`); si no, déjalo en tu respuesta final.
+de cada publicación. Para que el dueño vea tu resumen ahí, incluye en la rama del lote (paso 7) el archivo
+`reviews/<AAAA-MM-DD del lunes>-resumen.md` con el resumen del paso 10: el Action lo publica como comentario.
 
 ## 10. Resumen final
 Escribe un resumen breve: qué se programó (fecha, tipo, tema), qué aprendiste del informe y
