@@ -1,0 +1,69 @@
+{
+  "id": "2026-11-25-carousel-nuestras-habitaciones",
+  "type": "carousel",
+  "publish_at": "2026-11-25T13:00:00-03:00",
+  "caption": "¿Simple, VIP o Jacuzzi? 👀\nDesliza y elige tu próxima pausa en Providencia. Todas con baño privado, Smart TV y cortesía de bienvenida.\nGuárdalo para tu próxima escapada y reserva por WhatsApp (link en el perfil).\n#Providencia #Santiago #HotelParaParejas #EscapadaEnPareja #JacuzziPrivado",
+  "alt_text": "Las tres habitaciones de Hotel Le Chateau: Simple, VIP y Jacuzzi",
+  "scenes": [
+    {
+      "visual": {
+        "source": "diseno",
+        "estilo": "poster-deco"
+      },
+      "kicker": "HOTEL LE CHATEAU · PROVIDENCIA",
+      "text": "Elige tu pausa",
+      "subtext": "Desliza →"
+    },
+    {
+      "visual": {
+        "source": "diseno",
+        "path": "material/habitaciones/simple/chateaueditadas-720x720-4-6.jpg",
+        "estilo": "poster-deco"
+      },
+      "kicker": "01",
+      "text": "Simple",
+      "subtext": "Acogedora y a tu ritmo"
+    },
+    {
+      "visual": {
+        "source": "diseno",
+        "path": "material/habitaciones/vip/chateaueditadas-720x720-4-2.jpg",
+        "estilo": "poster-deco"
+      },
+      "kicker": "02",
+      "text": "VIP",
+      "subtext": "Más amplia y con más detalle"
+    },
+    {
+      "visual": {
+        "source": "diseno",
+        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-8.jpg",
+        "estilo": "poster-deco"
+      },
+      "kicker": "03",
+      "text": "Jacuzzi",
+      "subtext": "Tu propio jacuzzi, con espuma incluida"
+    },
+    {
+      "visual": {
+        "source": "diseno",
+        "estilo": "poster-deco"
+      },
+      "kicker": "SIMPLE · VIP · JACUZZI",
+      "text": "¿Cuál eliges?",
+      "cta": "RESERVA POR WHATSAPP"
+    }
+  ],
+  "status": "rendered",
+  "media": {
+    "kind": "carousel",
+    "files": [
+      "media/2026-11-25-carousel-nuestras-habitaciones/slide_01.jpg",
+      "media/2026-11-25-carousel-nuestras-habitaciones/slide_02.jpg",
+      "media/2026-11-25-carousel-nuestras-habitaciones/slide_03.jpg",
+      "media/2026-11-25-carousel-nuestras-habitaciones/slide_04.jpg",
+      "media/2026-11-25-carousel-nuestras-habitaciones/slide_05.jpg"
+    ],
+    "preview": "media/2026-11-25-carousel-nuestras-habitaciones/preview.jpg"
+  }
+}
