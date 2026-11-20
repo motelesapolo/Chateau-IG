@@ -211,7 +211,7 @@ def edit_allowed(path: str, mode: str) -> bool:
 
 
 def _openai_edit(src, instruction: str, dest: Path, portrait: bool | None, session=None,
-                 models: list[str] | None = None, story: bool = False) -> Path:
+                 models: list[str] | None = None, story: bool | str = False) -> Path:
     """portrait=None: conserva la proporción de la foto (retoque: nunca se reencuadra ni se inventa lo que falta)."""
     """Edita con la API de imágenes de OpenAI. `src` puede ser una foto o una lista (foto + referencias)."""
     global _openai_count, last_engine
@@ -240,12 +240,12 @@ def _openai_edit(src, instruction: str, dest: Path, portrait: bool | None, sessi
     last = None
     for model in models or cfg["edit_models"]:
         data = {"model": model, "prompt": instruction, "n": "1", "quality": "high", "input_fidelity": "high",
-                "size": "1088x1920" if story else size, "output_format": "jpeg"}
+                "size": (story if isinstance(story, str) else "1088x1920") if story else size, "output_format": "jpeg"}
         r = http.post("https://api.openai.com/v1/images/edits",
                       headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
                       data=data, files=files, timeout=300)
         if story and r.status_code == 400 and "size" in r.text.lower():
-            data["size"] = "1024x1536"  # el modelo no acepta 9:16: se completa después sin recortar
+            data["size"] = "1024x1536"  # el modelo no acepta ese tamaño: se completa después sin recortar
             r = http.post("https://api.openai.com/v1/images/edits",
                           headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
                           data=data, files=files, timeout=300)
@@ -322,6 +322,11 @@ def place_photo(design: Image.Image, photo: Image.Image, mask: Image.Image, fade
     return layer
 
 
+def native_size(size: tuple[int, int]) -> str:
+    """Tamaño pedido a la IA en la misma proporción del formato (múltiplos de 16)."""
+    return "1088x1920" if size == VERTICAL else "1088x1360" if size == FEED else f"{size[0] // 16 * 16}x{size[1] // 16 * 16}"
+
+
 def fit_without_crop(img: Image.Image, size: tuple[int, int]) -> Image.Image:
     """Ajusta al formato sin cortar nada: si sobra espacio, se completa con el mismo fondo desenfocado."""
     from PIL import ImageFilter
@@ -347,7 +352,7 @@ def ai_design(photo: Path, brief: str, dest: Path, size: tuple[int, int], refs: 
     if models is None:
         models = (config.load_settings().get("openai_images") or {}).get("design_models")
     _openai_edit([photo, config.ROOT / "assets/brand/logo.png", *(refs or [])], prompt, raw, size[1] > size[0],
-                 models=models, story=size == VERTICAL)
+                 models=models, story=native_size(size))
     design = Image.open(raw).convert("RGB")
     mask = green_mask(design)
     if mask is None:
@@ -502,7 +507,7 @@ def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int,
                 _openai_edit([config.ROOT / "assets/brand/logo.png"],
                              design_brief(vis, scene or {}) + " No photograph in this piece: pure graphic design. "
                              "Image 1 is the logo: reproduce it exactly, without changing its letters.",
-                             raw, size[1] > size[0], models=models, story=size == VERTICAL)
+                             raw, size[1] > size[0], models=models, story=native_size(size))
                 out = workdir / f"design_{seed}.jpg"
                 fit_without_crop(Image.open(raw).convert("RGB"), size).save(out, quality=95)
                 return out, "design"
