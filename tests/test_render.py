@@ -169,3 +169,10 @@ def test_openai_edit_sends_high_fidelity(tmp_path, monkeypatch):
     out = render._openai_edit(src, render.EDIT_PRESETS["luz"], tmp_path / "out.jpg", True, session=S())
     assert out.exists() and sent["url"].endswith("/images/edits")
     assert sent["data"]["input_fidelity"] == "high" and "ONLY light and color" in sent["data"]["prompt"]
+
+
+
+def test_unverified_org_tries_next_model():
+    from autopilot import render
+    assert render._model_unavailable(_Resp(403, text="Your organization must be verified to use the model gpt-image-2"))
+    assert not render._model_unavailable(_Resp(400, text="Your request was rejected by the safety system (prompt)"))

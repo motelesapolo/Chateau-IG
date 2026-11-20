@@ -137,6 +137,14 @@ def _pollinations(vis: dict, size: tuple[int, int], dest: Path, seed: int) -> Pa
     raise RenderError(f"Pollinations no generó la imagen: {last}")
 
 
+def _model_unavailable(r) -> bool:
+    """El modelo no existe o la cuenta no tiene acceso (p. ej. falta verificar la organización): probar el siguiente."""
+    text = r.text.lower()
+    if r.status_code == 403 and ("verif" in text or "model" in text):
+        return True
+    return r.status_code in (400, 404) and "model" in text and "prompt" not in text
+
+
 def branded_prompt(vis: dict) -> str:
     """Agrega el estilo de la marca a cada pedido de imagen IA (se omite con "brand_style": false)."""
     style = brand().get("ai_style", "")
@@ -159,7 +167,7 @@ def _openai(vis: dict, size: tuple[int, int], dest: Path, session=None) -> Path:
         body = {"model": model, "prompt": branded_prompt(vis), "n": 1, "quality": vis.get("quality", cfg["quality"]),
                 "size": "1024x1536" if portrait else "1024x1024", "output_format": "jpeg"}
         r = http.post("https://api.openai.com/v1/images/generations", headers=headers, json=body, timeout=300)
-        if r.status_code in (400, 404) and "model" in r.text.lower() and "prompt" not in r.text.lower():
+        if _model_unavailable(r):
             last = f"{model}: {r.status_code}"
             continue  # modelo no disponible para esta cuenta: probar el siguiente
         if r.status_code >= 400:
@@ -219,7 +227,7 @@ def _openai_edit(src: Path, instruction: str, dest: Path, portrait: bool, sessio
         r = http.post("https://api.openai.com/v1/images/edits",
                       headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
                       data=data, files={"image[]": ("foto.jpg", buf.getvalue(), "image/jpeg")}, timeout=300)
-        if r.status_code in (400, 404) and "model" in r.text.lower() and "prompt" not in r.text.lower():
+        if _model_unavailable(r):
             last = f"{model}: {r.status_code}"
             continue
         if r.status_code >= 400:
