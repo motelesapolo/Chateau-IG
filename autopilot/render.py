@@ -298,12 +298,27 @@ def green_mask(img: Image.Image) -> Image.Image | None:
     return mask.filter(ImageFilter.MaxFilter(7))
 
 
-def place_photo(design: Image.Image, photo: Image.Image, mask: Image.Image) -> Image.Image:
+def place_photo(design: Image.Image, photo: Image.Image, mask: Image.Image, fade: bool = False) -> Image.Image:
+    """Pone la foto real en el hueco. fade=True: el borde inferior de la foto se funde con el fondo del diseño."""
     box = mask.getbbox()
     w, h = box[2] - box[0], box[3] - box[1]
     fitted = ImageOps.fit(ImageOps.exif_transpose(photo).convert("RGB"), (w, h), Image.LANCZOS, centering=(0.5, 0.45))
     layer = design.convert("RGB").copy()
-    layer.paste(fitted, box[:2], mask.crop(box))
+    slot = mask.crop(box)
+    if fade:
+        # 1) tapar el verde con el color del fondo que hay justo debajo del hueco
+        y = min(box[3] + 12, layer.height - 1)
+        row = [layer.getpixel((x, y)) for x in range(box[0], box[2], max(1, w // 40))]
+        bg = tuple(sorted(c[k] for c in row)[len(row) // 2] for k in range(3))
+        layer.paste(Image.new("RGB", (w, h), bg), box[:2], slot)
+        # 2) foto con degradado: opaca arriba, se desvanece en el 35% inferior
+        grad = Image.new("L", (1, h))
+        start = int(h * 0.65)
+        for yy in range(h):
+            grad.putpixel((0, yy), 255 if yy < start else int(255 * (1 - (yy - start) / max(1, h - start)) ** 1.6))
+        from PIL import ImageChops
+        slot = ImageChops.multiply(slot, grad.resize((w, h)))
+    layer.paste(fitted, box[:2], slot)
     return layer
 
 
@@ -321,7 +336,7 @@ def fit_without_crop(img: Image.Image, size: tuple[int, int]) -> Image.Image:
 
 
 def ai_design(photo: Path, brief: str, dest: Path, size: tuple[int, int], refs: list[Path] | None = None,
-              models: list[str] | None = None) -> Path:
+              models: list[str] | None = None, fade: bool = False) -> Path:
     """La IA diseña la pieza completa dejando un hueco verde; ahí va la foto REAL sin modificar."""
     ratio = ImageOps.exif_transpose(Image.open(photo)).size
     shape = "landscape 3:2" if ratio[0] > ratio[1] * 1.2 else "portrait 4:5" if ratio[1] > ratio[0] * 1.2 else "square"
@@ -337,7 +352,7 @@ def ai_design(photo: Path, brief: str, dest: Path, size: tuple[int, int], refs: 
     mask = green_mask(design)
     if mask is None:
         raise RenderError("La IA no dejó el espacio verde para la foto; no se usa este diseño")
-    out = place_photo(design, Image.open(photo), mask)
+    out = place_photo(design, Image.open(photo), mask, fade=fade)
     fit_without_crop(out, size).save(dest, quality=95)
     return dest
 
@@ -498,7 +513,11 @@ def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int,
         if os.environ.get("OPENAI_API_KEY"):
             try:
                 photo = prepare_photo(vis, size, workdir, seed)
-                return ai_design(photo, design_brief(vis, scene or {}), workdir / f"design_{seed}.jpg", size), "design"
+                import json as _json
+                cfg = _json.loads((config.CONFIG_DIR / "estilos.json").read_text(encoding="utf-8"))
+                fade = vis.get("estilo") in cfg.get("con_fundido", [])
+                return ai_design(photo, design_brief(vis, scene or {}), workdir / f"design_{seed}.jpg", size,
+                                 fade=fade), "design"
             except Exception as exc:  # noqa: BLE001
                 log.warning("Diseño con IA no disponible (%s); se usa la plantilla con marco", exc)
         return prepare_photo(vis, size, workdir, seed), "image"
@@ -952,7 +971,8 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
             scene = {**scene, "_framing": framing}
             overlay = work / f"overlay_{i}.png"
             overlay_for(scene, VERTICAL).save(overlay)
-            audio = tts(scene.get("narration", ""), voice, rate, work / f"voice_{i}.mp3")
+            use_voice = item.get("voz", settings.get("narration", False))
+            audio = tts(scene.get("narration", ""), voice, rate, work / f"voice_{i}.mp3") if use_voice else None
             if scene.get("duration") is None and kind == "video":
                 dur = min(media_duration(src) or 4.0, 90.0)  # video propio: se usa completo
             else:

@@ -45,8 +45,9 @@ Nada de negro puro, blancos fríos, azules ni colores neón.
   `"source": "diseno"`: la IA diseña la pieza completa y deja un hueco; ahí va **la foto real sin modificar**.
 - **Nada genérico:** prohibido el "flyer de plantilla" (hojitas, fila de íconos en círculos, botón píldora, todo
   centrado y simétrico, cintas, letras manuscritas). Las reglas exactas están en `config/estilos.json`.
-- **Estilos para rotar** (`config/estilos.json`): `poster-deco` (póster art déco años 20), `revista` (página de
-  revista de interiores, asimétrica), `cine` (cartel de créditos de película de noche), `suizo` (grilla tipográfica),
-  `collage` (papel recortado con dorado). Un estilo por reel (todas sus escenas iguales); no repetir el mismo estilo
-  más de 2 veces seguidas en el perfil.
+- **Estilos aprobados por el dueño** (`aprobados` en `config/estilos.json`): `poster-deco` (póster art déco años 20)
+  y `noche-burdeos` (foto grande arriba que se funde en burdeos, esquinas doradas art déco). Solo se usan esos.
+  `cine`, `suizo` y `collage` quedan para probar (con `"prueba": true`); `revista` NO le gustó.
+  Un estilo por reel (todas sus escenas iguales); alternar los aprobados en el perfil.
+- **Audio:** sin voz artificial (al dueño no le gustó). Reels con música de `assets/music/` cuando exista.
 - Textos cortos y exactos: `kicker`, `text` (título), `subtext`, `cta`. Sin precios salvo promo vigente.

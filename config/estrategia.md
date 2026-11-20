@@ -34,6 +34,10 @@ CTA recurrentes (rotar, no repetir siempre el mismo):
 - Final con CTA; nunca terminar con un cierre plano.
 
 ## 4. Mezcla semanal
+> **Por ahora solo imágenes (decisión del dueño, 20-11-2026): 0 reels, 2 carruseles, 4 imágenes, 7 historias.**
+> El alcance a gente nueva viene sobre todo de los reels; sin reels, el peso lo llevan los carruseles (guardados y
+> envíos) y las acciones fuera de Instagram (QR, bot de WhatsApp). Retomar reels cuando el dueño lo pida.
+
 | Formato | Cantidad | Para qué |
 |---|---|---|
 | Reels | 4 | Alcance a gente nueva |

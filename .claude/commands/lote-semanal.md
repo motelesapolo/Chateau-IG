@@ -43,6 +43,8 @@ paso 1 falle. Al final deja un resumen corto.
 
 ## 5. Planificar
 - Usa las cantidades de `weekly_plan` en `config/settings.json` (reels, carruseles, imágenes, historias).
+  **Por ahora solo imágenes: nada de reels ni historias en video** (`reel: 0`). Todo es `image`, `carousel` o
+  `story` con imagen fija.
 - **El lunes no se publica nada antes de las 18:00** (es el día de revisión del dueño): ese día solo la
   historia a las 18:00 y el post a las 20:30. De martes a domingo, los horarios normales.
 - Horarios: usa los de `config/estrategia.md` §5 (jueves/viernes tarde a las 18:30) y conviértelos con
@@ -54,7 +56,7 @@ paso 1 falle. Al final deja un resumen corto.
 Reglas de calidad:
 - **Reels (15–35 s, 4–8 escenas):** la escena 1 es el gancho (texto en pantalla de máx. 7 palabras y
   narración que genere curiosidad en <2 s). Una idea por escena. Cierre con llamado a la acción
-  (comentar, guardar o seguir). `narration` en español natural, frases cortas.
+  (comentar, guardar o seguir). **Sin voz** (no escribas `narration`: al dueño no le gusta la voz artificial). Usa `music` si hay temas en `assets/music/`.
 - **Carruseles (5–8 láminas):** lámina 1 = promesa clara; láminas de texto con `"source": "card"`
   (colores de marca consistentes en `bg`/`bg2`); última lámina = resumen o llamado a la acción.
 - **Imágenes:** una idea fuerte, texto corto encima o ninguno.
@@ -62,7 +64,7 @@ Reglas de calidad:
 - **Visuales:**
   - **Diseños con IA (`source: diseno`)**: úsalos en la portada/gancho de cada reel (y en todas sus escenas con foto
     si quieres el reel completo diseñado, siempre con el MISMO estilo), en las historias con foto y en la primera
-    lámina de los carruseles. Elige el `estilo` rotando los de `config/estilos.json` (ver `config/marca.md`).
+    lámina de los carruseles. Elige el `estilo` SOLO entre los `aprobados` de `config/estilos.json`, alternándolos (ver `config/marca.md`).
     Pon los textos en `kicker`, `text`, `subtext` y `cta` (cortos). Al revisar las vistas previas, comprueba que la
     IA escribió bien los textos y que el diseño no es genérico; si falla, corrige con `"replace": true`.
   - **Prioridad:** 1) `material/listos/` (se publica tal cual) · 2) fotos y videos propios de `material/`

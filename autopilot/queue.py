@@ -188,9 +188,11 @@ def validate(item: dict) -> list[str]:
             p = config.ROOT / str(vis.get("path", ""))
             if vis.get("path") and not p.is_file():
                 errs.append(f"escena {i}: no existe el archivo {vis.get('path')}")
-            estilos = _json.loads((config.CONFIG_DIR / "estilos.json").read_text(encoding="utf-8"))["estilos"]
-            if vis.get("estilo") and vis["estilo"] not in estilos:
-                errs.append(f"escena {i}: estilo '{vis['estilo']}' no existe ({', '.join(estilos)})")
+            ecfg = _json.loads((config.CONFIG_DIR / "estilos.json").read_text(encoding="utf-8"))
+            ok_styles = ecfg.get("aprobados", list(ecfg["estilos"]))
+            if vis.get("estilo") and vis["estilo"] not in ok_styles and not item.get("prueba"):
+                errs.append(f"escena {i}: estilo '{vis['estilo']}' no está aprobado por el dueño "
+                            f"(aprobados: {', '.join(ok_styles)})")
         if src == "file":
             p = config.ROOT / str(vis.get("path", ""))
             if not p.is_file():

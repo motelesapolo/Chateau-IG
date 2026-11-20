@@ -30,9 +30,9 @@
     "max_delay_seconds": 9
   },
   "weekly_plan": {
-    "reel": 4,
+    "reel": 0,
     "carousel": 2,
-    "image": 1,
+    "image": 4,
     "story": 7,
     "post_times": [
       "13:00",
@@ -44,7 +44,7 @@
       "story": "18:00",
       "post": "20:30"
     },
-    "note": "El lunes se reserva para que el dueño revise: lo primero sale el lunes 18:00."
+    "note": "Por ahora SOLO imágenes (sin videos ni reels), por decisión del dueño (2026-11-20). El lunes se reserva para que el dueño revise: lo primero sale el lunes 18:00."
   },
   "openai_images": {
     "model": "gpt-image-2",
@@ -89,5 +89,6 @@
     "enabled": true,
     "default": "approve",
     "changes_deadline": "lunes 13:30"
-  }
+  },
+  "narration": false
 }
