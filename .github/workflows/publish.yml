@@ -2,7 +2,14 @@ name: 2 · Publicar a su hora
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # cada 15 minutos (GitHub puede atrasarlo unos minutos)
+    # GitHub atrasa mucho los horarios "redondos": se usan minutos desplazados.
+    - cron: "4,19,34,49 * * * *"
+  push:
+    branches: [main]
+    paths: ["queue/**", "publicar/**"]   # publicar al instante si cambia la cola (o con un "toque")
+  workflow_run:
+    workflows: ["1 · Renderizar contenido"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
