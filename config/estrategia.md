@@ -1,9 +1,8 @@
 # Estrategia de @lechateau021
 
 > La lee Claude cada domingo antes de planificar la semana. Se ajusta con los informes de `reports/`.
-> Objetivo final: **que más parejas reserven** (no solo seguidores). Canal a potenciar: **WhatsApp** (todos los
-> llamados a la acción). MotelNow se mantiene como alternativa (app conocida y cómoda): aparece en la bio y en la
-> destacada de reservas, nunca como llamado principal de una publicación. Métrica principal: chats de WhatsApp
+> Objetivo final: **que más parejas reserven** (no solo seguidores). Único canal en Instagram: **WhatsApp**
+> (todos los llamados a la acción, la bio y las destacadas). Nunca mencionar MotelNow ni otras apps de reserva. Métrica principal: chats de WhatsApp
 > que llegan con la frase "Hola! Estaba revisando el perfil de Hotel Le Chateau".
 
 ## 1. Cómo reparte alcance Instagram (2026)
