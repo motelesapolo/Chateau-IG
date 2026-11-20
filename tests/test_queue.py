@@ -80,3 +80,10 @@ def test_ia_edit_only_light_on_rooms():
     bad = item(type="image", scenes=[{"visual": {"source": "file", "path": room, "ia_edit": "fondo"}}])
     assert q.validate(ok) == []
     assert any("solo se permite ia_edit 'luz'" in e for e in q.validate(bad))
+
+
+def test_ai_label_only_for_generated_images():
+    real = {"scenes": [{"visual": {"source": "plantilla", "formato": "foto-frase", "path": "x.jpg"}}]}
+    gen = {"scenes": [{"visual": {"source": "plantilla", "formato": "grafica", "fondo_prompt": "velvet"}}]}
+    assert not q.uses_generated_images(real)
+    assert q.uses_generated_images(gen)

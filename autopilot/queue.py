@@ -262,3 +262,17 @@ def due_items(now: datetime, max_late_hours: float) -> list[tuple[Path, dict, bo
             out.append((path, item, late))
     out.sort(key=lambda x: parse_time(x[1]["publish_at"]))
     return out
+
+
+AI_SOURCES = {"ia", "pollinations", "diseno"}
+
+
+def uses_generated_images(item: dict) -> bool:
+    """True si alguna escena muestra imágenes CREADAS por IA (no cuenta el retoque de color de fotos reales)."""
+    for scene in item.get("scenes", []):
+        vis = scene.get("visual") or {}
+        if vis.get("source") in AI_SOURCES:
+            return True
+        if vis.get("source") == "plantilla" and vis.get("formato") == "grafica" and vis.get("fondo_prompt"):
+            return True
+    return False

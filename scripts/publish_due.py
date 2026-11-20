@@ -95,7 +95,8 @@ def main() -> int:
                 urls = [hosting.reachable_url(f, sha) for f in item["media"]["files"]]
                 results.append(f"- 🧪 {item['id']}: se publicaría {urls}")
                 continue
-            info = publish_one(client, item, sha, ai, settings)
+            label = item.get("ai_generated", q.uses_generated_images(item)) if ai else False
+            info = publish_one(client, item, sha, label, settings)
             item["status"] = "published"
             item["result"] = {"media_id": info.get("id"), "permalink": info.get("permalink"),
                               "published_at": now.isoformat()}

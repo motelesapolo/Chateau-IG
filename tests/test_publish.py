@@ -59,7 +59,8 @@ def test_publishes_due_and_moves_file(env):
     rendered("2026-01-02-reel", now - timedelta(minutes=3), t="reel")
     rendered("2026-01-03-futuro", now + timedelta(days=1))
     publish_due.main()
-    assert FakeIG.calls[0] == ("image", "https://cdn/abc123/media/2026-01-01-ya/post.jpg", "hola", True)
+    # tarjeta de marca, sin imágenes creadas por IA: sin etiqueta "Hecho con IA"
+    assert FakeIG.calls[0] == ("image", "https://cdn/abc123/media/2026-01-01-ya/post.jpg", "hola", False)
     assert FakeIG.calls[1][2] == "https://cdn/abc123/media/2026-01-02-reel/cover.jpg"
     done = q.load(config.PUBLISHED_DIR / "2026-01-01-ya.json")
     assert done["status"] == "published" and done["result"]["permalink"].endswith("/p/abc/")

@@ -83,7 +83,7 @@ def html_for(formato: str, size: tuple[int, int], data: dict) -> str:
     a = _assets()
     w, h = size
     vertical = h > w * 1.5
-    top_safe, bottom_safe = (230, 330) if vertical else (60, 70)
+    top_safe, bottom_safe = (270, 340) if vertical else (60, 70)
     kicker, text, sub = data.get("kicker", ""), _rich(data.get("text", "")), _rich(data.get("subtext", ""))
     if formato in {"foto-frase", "detalle"}:
         photo = Path(data["photo"]).as_uri()
