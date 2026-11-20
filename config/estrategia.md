@@ -18,7 +18,8 @@ Somos un hotel para parejas: el gesto más natural es **mandarle el reel a la pa
 Cada reel debe tener una razón para enviarlo:
 - Planes: "Plan para un martes cualquiera", "Lo que necesitan después de una semana pesada".
 - Complicidad (sin nada sugerente): "Cuando los dos dicen 'necesitamos desconectar'".
-- Datos útiles: "Promo 6x3: pagas 3 horas y te quedas 6", "Estacionamiento privado y gratis en Providencia".
+- Datos útiles: "Estacionamiento privado y gratis en Providencia", qué incluye cada habitación, cómo llegar.
+- Promos: SOLO las vigentes en `config/promos.json` (las define el dueño semana a semana). Si no hay, no se habla de promos.
 - Fechas: aniversario, San Valentín, fin de mes, feriados largos.
 CTA recurrentes (rotar, no repetir siempre el mismo):
 - "Mándaselo a quien te debe una escapada"
@@ -37,10 +38,10 @@ CTA recurrentes (rotar, no repetir siempre el mismo):
 | Reels | 4 | Alcance a gente nueva |
 | Carruseles | 2 | Guardados: precios, promos, servicios, cómo llegar |
 | Imagen | 1 | Fecha especial o anuncio |
-| Historias | 7 (1 diaria) | Recordar promos, "hoy hay disponibilidad", detrás de escena |
+| Historias | 7 (1 diaria) | Promo vigente (si hay), detrás de escena, preguntas, recordar el post del día |
 
 Pilares (repartir en la semana): desconexión y descanso · habitaciones reales · pequeños placeres
-(cortesía, pizza, pisco sour, desayuno) · datos útiles (6x3, estacionamiento, metro) · fechas especiales.
+(cortesía, pizza, pisco sour, desayuno) · datos útiles (estacionamiento, metro, qué incluye cada habitación) · fechas especiales.
 
 ## 5. Horarios (Chile)
 Punto de partida (se corrige con nuestros datos cuando la cuenta pase ~100 seguidores):
@@ -87,11 +88,11 @@ contenido sugerente, prometer disponibilidad. Todo eso baja el alcance o arriesg
 Plan completo para el dueño: https://claude.ai/artifact/2ZDR3NDpyhdUiTHhjqradh
 | Etapa | Fechas | Foco del contenido |
 |---|---|---|
-| Base | 20 nov – 7 dic | Habitaciones reales, Promo 6x3, cómo llegar, "síguenos" |
+| Base | 20 nov – 7 dic | Habitaciones reales, cómo llegar, servicios, "síguenos" |
 | Fiestas | 8 – 31 dic | Gift card "Regala una escapada", Pack Aniversario, Navidad (24 dic) y Año Nuevo |
 | Verano | 1 – 25 ene | Escapadas en la ciudad, sorteo del mes |
 | San Valentín | 26 ene – 14 feb | Cuenta regresiva, packs, gift cards; el mejor reel va la semana del 14 |
-- Ofertas solo si el dueño las confirmó en `config/persona.md` (gift cards, packs y beneficio "vengo de Instagram"
-  están propuestos, aún sin precio). Hasta entonces: Promo 6x3 y servicios existentes.
+- Ofertas: SOLO las de `config/promos.json` vigentes en la fecha de cada publicación (gift cards, packs y beneficio
+  "vengo de Instagram" están propuestos en el plan, sin precio). Sin promos vigentes: contenido de marca y servicios.
 - Cada semana: 1 reel pensado para enviar a la pareja, 1 carrusel de precios/promos para guardar.
 - Ganchos y CTA de ejemplo: ver el plan (sección "Textos que hacen venir a la gente").

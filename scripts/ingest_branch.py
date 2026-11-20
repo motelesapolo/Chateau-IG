@@ -21,9 +21,25 @@ def git_bytes(*args: str) -> bytes:
 
 
 def main(ref: str) -> int:
-    names = git_bytes("ls-tree", "-r", "--name-only", ref, "--", "queue", "assets", "reviews").decode().splitlines()
+    names = git_bytes("ls-tree", "-r", "--name-only", ref, "--", "queue", "assets", "reviews",
+                      "config/promos.json").decode().splitlines()
     published = q.published_ids()
     added, skipped, invalid, assets = [], [], [], 0
+
+    promos_note = ""
+    if "config/promos.json" in names:
+        from autopilot import promos as promos_mod
+        data = git_bytes("show", f"{ref}:config/promos.json")
+        try:
+            parsed = json.loads(data)
+            errs = promos_mod.validate(parsed.get("promos", []))
+        except ValueError:
+            errs = ["JSON inválido"]
+        if errs:
+            promos_note = "- ⚠️ config/promos.json no se incorporó: " + "; ".join(errs)
+        elif (config.ROOT / "config/promos.json").read_bytes() != data:
+            (config.ROOT / "config/promos.json").write_bytes(data)
+            promos_note = "- Promos actualizadas"
 
     for name in names:
         # reviews/*.md: mensajes de Claude para el issue de revisión (los publica scripts/review_issue.py)
@@ -74,6 +90,7 @@ def main(ref: str) -> int:
     lines = [f"### Cola recibida desde `{ref}`",
              f"- Nuevas o actualizadas: **{len(added)}** {', '.join(added)}",
              f"- Archivos de assets: {assets}",
+             promos_note,
              f"- Omitidas: {len(skipped)}"]
     lines += [f"  - {s}" for s in skipped]
     if invalid:

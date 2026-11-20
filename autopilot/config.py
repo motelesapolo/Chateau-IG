@@ -21,8 +21,12 @@ def load_settings() -> dict:
         return json.load(fh)
 
 
-def load_persona() -> str:
-    return (CONFIG_DIR / "persona.md").read_text(encoding="utf-8")
+def load_persona(with_promos: bool = True) -> str:
+    text = (CONFIG_DIR / "persona.md").read_text(encoding="utf-8")
+    if with_promos:
+        from . import promos  # import tardío: promos usa config
+        text = f"{text.rstrip()}\n\n{promos.as_markdown()}\n"
+    return text
 
 
 def timezone() -> ZoneInfo:

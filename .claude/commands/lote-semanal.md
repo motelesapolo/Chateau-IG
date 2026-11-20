@@ -11,6 +11,13 @@ paso 1 falle. Al final deja un resumen corto.
 - Lee `CLAUDE.md`, `config/persona.md`, **`config/marca.md`** (paleta, tipografías, logo), **`config/estrategia.md`** (cómo crecer: formatos, horarios, SEO, CTA),
   `config/settings.json` y la cabecera de `autopilot/queue.py`.
 - Si `config/persona.md` todavía tiene `[COMPLETAR`, **detente** y explica qué falta completar.
+- **Promos:** lee `config/promos.json`. Luego revisa los comentarios del dueño (author_association OWNER, MEMBER o
+  COLLABORATOR) en los issues de revisión abiertos
+  (`curl -s "https://api.github.com/repos/<owner>/<repo>/issues?labels=revision&state=open"` y luego
+  `/issues/<n>/comments`) que hablen de una **promo nueva** para la próxima semana. Agrégala a `config/promos.json`
+  con título, detalle, condiciones, `desde`/`hasta` y `mencionar` (si falta un dato esencial como precio o fechas,
+  no la inventes: anótalo en el resumen y no la publiques). Ese archivo va en la misma rama del lote.
+  **Solo se anuncian promos vigentes en la fecha de cada publicación. Si no hay ninguna, no se habla de promos.**
 - `git fetch origin main && git checkout -B trabajo origin/main` para partir de lo último.
 
 ## 2. Aprender de la semana anterior
@@ -87,7 +94,7 @@ Luego ejecuta `python scripts/validate_queue.py` y corrige hasta que todo esté 
 ## 7. Subir
 ```bash
 git checkout -b claude/lote-<AAAA-MM-DD del lunes>
-git add queue reviews && git commit -m "Lote semanal <fecha>" && git push -u origin HEAD
+git add queue reviews config/promos.json && git commit -m "Lote semanal <fecha>" && git push -u origin HEAD
 ```
 El Action **1 · Renderizar contenido** incorpora la cola a `main`, genera imágenes/videos y borra la rama.
 

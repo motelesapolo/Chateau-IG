@@ -8,6 +8,7 @@ from pathlib import Path
 
 import _boot  # noqa: F401
 from autopilot import config
+from autopilot import promos
 from autopilot import queue as q
 
 
@@ -37,6 +38,10 @@ def main(paths: list[str]) -> int:
                 print(f"   - {e}")
         else:
             print(f"✅ {path.name} ({item['type']}, {item['publish_at']})")
+    perrs = promos.validate()
+    for e in perrs:
+        print(f"❌ config/promos.json: {e}")
+    bad += bool(perrs)
     print(f"\n{len(files) - bad}/{len(files)} publicaciones válidas")
     return 1 if bad else 0
 

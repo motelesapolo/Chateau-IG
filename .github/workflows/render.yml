@@ -66,7 +66,7 @@ jobs:
 
       - name: Guardar cambios en main
         run: |
-          git add -A queue media assets reviews
+          git add -A queue media assets reviews config/promos.json
           if git diff --cached --quiet; then echo "Sin cambios"; exit 0; fi
           git commit -qm "render: cola actualizada"
           for i in 1 2 3; do

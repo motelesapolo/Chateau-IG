@@ -1,0 +1,4 @@
+{
+  "_ayuda": "Promos semana a semana. Solo existen las que están aquí y solo entre 'desde' y 'hasta' (inclusive). mencionar: 'siempre' (se publica y se ofrece) o 'si_preguntan' (no se publica; el bot solo la confirma si preguntan). Ejemplo: {\"titulo\": \"Martes de jacuzzi\", \"detalle\": \"Habitación Jacuzzi 3 horas a $40.000\", \"condiciones\": \"Solo martes de 12:00 a 20:00, sujeto a disponibilidad\", \"desde\": \"2026-12-01\", \"hasta\": \"2026-12-29\", \"mencionar\": \"siempre\"}",
+  "promos": []
+}
