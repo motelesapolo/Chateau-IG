@@ -210,8 +210,9 @@ def edit_allowed(path: str, mode: str) -> bool:
     return mode == "luz" or not str(path).startswith(PROTECTED_DIRS)
 
 
-def _openai_edit(src, instruction: str, dest: Path, portrait: bool, session=None,
+def _openai_edit(src, instruction: str, dest: Path, portrait: bool | None, session=None,
                  models: list[str] | None = None) -> Path:
+    """portrait=None: conserva la proporción de la foto (retoque: nunca se reencuadra ni se inventa lo que falta)."""
     """Edita con la API de imágenes de OpenAI. `src` puede ser una foto o una lista (foto + referencias)."""
     global _openai_count, last_engine
     cfg = {**OPENAI_DEFAULTS, **(config.load_settings().get("openai_images") or {})}
@@ -230,10 +231,16 @@ def _openai_edit(src, instruction: str, dest: Path, portrait: bool, session=None
         else:
             im.save(buf, "JPEG", quality=92)
             files.append(("image[]", (f"img{k}.jpg", buf.getvalue(), "image/jpeg")))
+    if portrait is None:
+        first = ImageOps.exif_transpose(Image.open(src[0] if isinstance(src, (list, tuple)) else src))
+        ratio = first.width / first.height
+        size = "1536x1024" if ratio > 1.2 else "1024x1536" if ratio < 0.83 else "1024x1024"
+    else:
+        size = "1024x1536" if portrait else "1024x1024"
     last = None
     for model in models or cfg["edit_models"]:
         data = {"model": model, "prompt": instruction, "n": "1", "quality": "high", "input_fidelity": "high",
-                "size": "1024x1536" if portrait else "1024x1024", "output_format": "jpeg"}
+                "size": size, "output_format": "jpeg"}
         r = http.post("https://api.openai.com/v1/images/edits",
                       headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
                       data=data, files=files, timeout=300)
@@ -268,7 +275,7 @@ def prepare_photo(vis: dict, size: tuple[int, int], workdir: Path, seed: int) ->
         else:
             instruction = EDIT_PRESETS.get(mode) or f"{mode}. {PRESERVE}"
             try:
-                path = _openai_edit(path, instruction, workdir / f"edit_{seed}.jpg", size[1] > size[0])
+                path = _openai_edit(path, instruction, workdir / f"edit_{seed}.jpg", None)
             except Exception as exc:  # noqa: BLE001
                 global last_error
                 last_error = str(exc)[:200]
