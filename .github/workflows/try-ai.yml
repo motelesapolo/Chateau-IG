@@ -1,0 +1,38 @@
+name: 7 · Probar API de ChatGPT
+
+# Se ejecuta al cambiar pruebas/ia/pedido.json (o a mano). Deja comparaciones antes/después en pruebas/ia/resultados/.
+on:
+  push:
+    branches: [main]
+    paths: ["pruebas/ia/pedido.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-writer
+  cancel-in-progress: false
+
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar
+        run: pip install -q -r requirements.txt
+      - name: Probar
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/try_ai.py
+      - name: Guardar resultados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add pruebas/ia/resultados
+          git commit -m "Resultados de la prueba de la API de ChatGPT" || exit 0
+          git pull --rebase origin main && git push origin HEAD:main

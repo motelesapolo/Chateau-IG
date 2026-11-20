@@ -40,6 +40,7 @@ UA = {"User-Agent": "ig-autopilot/1.0 (+https://github.com)"}
 
 _last_pollinations = 0.0
 _openai_count = 0
+last_engine = ""  # qué motor generó/retocó la última imagen (para pruebas e informes)
 OPENAI_DEFAULTS = {"model": "gpt-image-2", "fallback_models": ["gpt-image-1.5", "gpt-image-1", "gpt-image-1-mini"],
                    "edit_models": ["gpt-image-2", "gpt-image-1.5", "gpt-image-1"],
                    "quality": "medium", "max_per_run": 40}
@@ -170,6 +171,8 @@ def _openai(vis: dict, size: tuple[int, int], dest: Path, session=None) -> Path:
         else:
             raw = http.get(data["url"], timeout=120).content
         _openai_count += 1
+        global last_engine
+        last_engine = f"OpenAI {model}"
         img = Image.open(BytesIO(raw)).convert("RGB")
         ImageOps.fit(img, size, Image.LANCZOS).save(dest, quality=95)
         log.info("Imagen IA generada con OpenAI (%s)", model)
@@ -225,6 +228,8 @@ def _openai_edit(src: Path, instruction: str, dest: Path, portrait: bool, sessio
         out = r.json()["data"][0]
         raw = base64.b64decode(out["b64_json"]) if out.get("b64_json") else http.get(out["url"], timeout=120).content
         _openai_count += 1
+        global last_engine
+        last_engine = f"OpenAI {model}"
         Image.open(BytesIO(raw)).convert("RGB").save(dest, quality=95)
         log.info("Foto retocada con OpenAI (%s)", model)
         return dest
@@ -259,6 +264,8 @@ def ai_image(vis: dict, size: tuple[int, int], dest: Path, seed: int) -> Path:
             return _openai(vis, size, dest)
         except Exception as exc:  # noqa: BLE001
             log.warning("OpenAI no generó la imagen (%s); se usa Pollinations", exc)
+    global last_engine
+    last_engine = "Pollinations (gratis)"
     return _pollinations(vis, size, dest, seed)
 
 

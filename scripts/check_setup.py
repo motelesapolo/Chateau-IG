@@ -60,6 +60,21 @@ def main() -> int:
     else:
         mark(False, "Falta el secreto GEMINI_API_KEY (o GROQ_API_KEY)")
 
+    if os.environ.get("OPENAI_API_KEY"):
+        try:
+            r = requests.get("https://api.openai.com/v1/models", timeout=30,
+                             headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"})
+            if r.status_code == 200:
+                models = sorted(m["id"] for m in r.json().get("data", []) if m["id"].startswith("gpt-image"))
+                mark(bool(models), "API de ChatGPT conectada (imágenes: " + (", ".join(models) or "ninguna") + ")")
+            else:
+                mark(False, f"La clave de OpenAI no funciona ({r.status_code}): {r.text[:120]}")
+        except requests.RequestException as exc:
+            mark(False, f"No se pudo contactar a OpenAI: {exc}")
+    else:
+        lines.append("- ➖ Sin OPENAI_API_KEY (opcional: sin ella las imágenes IA usan el generador gratis "
+                     "y las fotos solo llevan retoque local)")
+
     if os.environ.get("PIXABAY_KEY"):
         r = requests.get("https://pixabay.com/api/", params={"key": os.environ["PIXABAY_KEY"], "q": "cafe",
                                                               "per_page": 3}, timeout=30)
