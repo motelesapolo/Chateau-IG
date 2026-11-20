@@ -59,7 +59,11 @@
       "gpt-image-1"
     ],
     "quality": "medium",
-    "max_per_run": 40
+    "max_per_run": 40,
+    "design_models": [
+      "gpt-image-2.6-sunburst",
+      "gpt-image-2"
+    ]
   },
   "brand": {
     "colors": {

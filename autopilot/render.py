@@ -211,7 +211,7 @@ def edit_allowed(path: str, mode: str) -> bool:
 
 
 def _openai_edit(src, instruction: str, dest: Path, portrait: bool | None, session=None,
-                 models: list[str] | None = None) -> Path:
+                 models: list[str] | None = None, story: bool = False) -> Path:
     """portrait=None: conserva la proporción de la foto (retoque: nunca se reencuadra ni se inventa lo que falta)."""
     """Edita con la API de imágenes de OpenAI. `src` puede ser una foto o una lista (foto + referencias)."""
     global _openai_count, last_engine
@@ -240,10 +240,15 @@ def _openai_edit(src, instruction: str, dest: Path, portrait: bool | None, sessi
     last = None
     for model in models or cfg["edit_models"]:
         data = {"model": model, "prompt": instruction, "n": "1", "quality": "high", "input_fidelity": "high",
-                "size": size, "output_format": "jpeg"}
+                "size": "1088x1920" if story else size, "output_format": "jpeg"}
         r = http.post("https://api.openai.com/v1/images/edits",
                       headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
                       data=data, files=files, timeout=300)
+        if story and r.status_code == 400 and "size" in r.text.lower():
+            data["size"] = "1024x1536"  # el modelo no acepta 9:16: se completa después sin recortar
+            r = http.post("https://api.openai.com/v1/images/edits",
+                          headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
+                          data=data, files=files, timeout=300)
         if r.status_code == 400 and "input_fidelity" in r.text:
             data.pop("input_fidelity")  # algunos modelos no aceptan este parámetro
             r = http.post("https://api.openai.com/v1/images/edits",
@@ -302,6 +307,19 @@ def place_photo(design: Image.Image, photo: Image.Image, mask: Image.Image) -> I
     return layer
 
 
+def fit_without_crop(img: Image.Image, size: tuple[int, int]) -> Image.Image:
+    """Ajusta al formato sin cortar nada: si sobra espacio, se completa con el mismo fondo desenfocado."""
+    from PIL import ImageFilter
+    w, h = size
+    if abs(img.width / img.height - w / h) < 0.02:
+        return img.resize(size, Image.LANCZOS)
+    scale = min(w / img.width, h / img.height)
+    inner = img.resize((round(img.width * scale), round(img.height * scale)), Image.LANCZOS)
+    bg = ImageOps.fit(img, (w // 8, h // 8), Image.LANCZOS).filter(ImageFilter.GaussianBlur(6)).resize(size, Image.LANCZOS)
+    bg.paste(inner, ((w - inner.width) // 2, (h - inner.height) // 2))
+    return bg
+
+
 def ai_design(photo: Path, brief: str, dest: Path, size: tuple[int, int], refs: list[Path] | None = None,
               models: list[str] | None = None) -> Path:
     """La IA diseña la pieza completa dejando un hueco verde; ahí va la foto REAL sin modificar."""
@@ -311,14 +329,16 @@ def ai_design(photo: Path, brief: str, dest: Path, size: tuple[int, int], refs: 
               "Image 1 is only a mood reference for colors and light: do not reproduce it. "
               "Image 2 is the logo: reproduce it exactly, without changing its letters.")
     raw = dest.with_suffix(".ia.jpg")
+    if models is None:
+        models = (config.load_settings().get("openai_images") or {}).get("design_models")
     _openai_edit([photo, config.ROOT / "assets/brand/logo.png", *(refs or [])], prompt, raw, size[1] > size[0],
-                 models=models)
+                 models=models, story=size == VERTICAL)
     design = Image.open(raw).convert("RGB")
     mask = green_mask(design)
     if mask is None:
         raise RenderError("La IA no dejó el espacio verde para la foto; no se usa este diseño")
     out = place_photo(design, Image.open(photo), mask)
-    ImageOps.fit(out, size, Image.LANCZOS).save(dest, quality=95)
+    fit_without_crop(out, size).save(dest, quality=95)
     return dest
 
 
