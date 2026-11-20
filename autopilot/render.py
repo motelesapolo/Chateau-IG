@@ -306,16 +306,16 @@ def place_photo(design: Image.Image, photo: Image.Image, mask: Image.Image, fade
     layer = design.convert("RGB").copy()
     slot = mask.crop(box)
     if fade:
-        # 1) tapar el verde con el color del fondo que hay justo debajo del hueco
-        y = min(box[3] + 12, layer.height - 1)
-        row = [layer.getpixel((x, y)) for x in range(box[0], box[2], max(1, w // 40))]
-        bg = tuple(sorted(c[k] for c in row)[len(row) // 2] for k in range(3))
-        layer.paste(Image.new("RGB", (w, h), bg), box[:2], slot)
+        # 1) tapar el verde con el fondo que hay justo debajo del hueco, columna por columna (sin costuras)
+        y = min(box[3] + 14, layer.height - 1)
+        strip = layer.crop((box[0], y, box[2], y + 1)).resize((w, h), Image.NEAREST)
+        layer.paste(strip, box[:2], slot)
         # 2) foto con degradado: opaca arriba, se desvanece en el 35% inferior
         grad = Image.new("L", (1, h))
-        start = int(h * 0.65)
+        start = int(h * 0.55)
         for yy in range(h):
-            grad.putpixel((0, yy), 255 if yy < start else int(255 * (1 - (yy - start) / max(1, h - start)) ** 1.6))
+            t = (yy - start) / max(1, h - start)
+            grad.putpixel((0, yy), 255 if yy < start else int(255 * (1 - t) ** 1.8))
         from PIL import ImageChops
         slot = ImageChops.multiply(slot, grad.resize((w, h)))
     layer.paste(fitted, box[:2], slot)
