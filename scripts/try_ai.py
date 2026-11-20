@@ -41,6 +41,20 @@ def main() -> int:
     for old in OUT.glob("*"):
         old.unlink()
     lines = ["# Prueba de la API de ChatGPT", ""]
+    import os
+    import requests
+    key = os.environ.get("OPENAI_API_KEY")
+    if not key:
+        lines.append("- ❌ No está el secreto OPENAI_API_KEY")
+    else:
+        r = requests.get("https://api.openai.com/v1/models", headers={"Authorization": f"Bearer {key}"}, timeout=30)
+        if r.status_code == 200:
+            models = sorted(m["id"] for m in r.json().get("data", []) if m["id"].startswith("gpt-image"))
+            lines.append(f"- ✅ Clave válida. Modelos de imagen visibles: {', '.join(models) or 'ninguno'}")
+        else:
+            lines.append(f"- ❌ La clave no funciona ({r.status_code})")
+        # Prueba mínima de saldo/acceso sin gastar: una edición se intenta abajo; aquí solo se informa.
+    lines.append("")
     with tempfile.TemporaryDirectory() as tmp:
         work = Path(tmp)
         for i, foto in enumerate(req.get("fotos", []), 1):
@@ -48,6 +62,7 @@ def main() -> int:
             original = Image.open(config.ROOT / foto["path"])
             local = render.retouch(ImageOps.exif_transpose(original), "suave")
             render.last_engine = "retoque local (la IA no respondió)"
+            render.last_error = ""
             t0 = time.time()
             final = Image.open(render.prepare_photo(vis, render.VERTICAL, work, i))
             secs = time.time() - t0
@@ -55,6 +70,8 @@ def main() -> int:
             panel([("Original", original), ("Retoque gratis", local),
                    (f"ChatGPT ({vis['ia_edit']})", final)]).save(OUT / name, quality=85)
             lines.append(f"- `{foto['path']}` · modo **{vis['ia_edit']}** → {render.last_engine} ({secs:.0f} s) · `{name}`")
+            if render.last_error:
+                lines.append(f"  - Motivo: {render.last_error}")
         for j, prompt in enumerate(req.get("generar", []), 1):
             render.last_engine = ""
             dest = work / f"gen{j}.jpg"

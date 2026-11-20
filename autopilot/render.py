@@ -40,6 +40,7 @@ UA = {"User-Agent": "ig-autopilot/1.0 (+https://github.com)"}
 
 _last_pollinations = 0.0
 _openai_count = 0
+last_error = ""
 last_engine = ""  # qué motor generó/retocó la última imagen (para pruebas e informes)
 OPENAI_DEFAULTS = {"model": "gpt-image-2", "fallback_models": ["gpt-image-1.5", "gpt-image-1", "gpt-image-1-mini"],
                    "edit_models": ["gpt-image-2", "gpt-image-1.5", "gpt-image-1"],
@@ -256,6 +257,8 @@ def prepare_photo(vis: dict, size: tuple[int, int], workdir: Path, seed: int) ->
             try:
                 path = _openai_edit(path, instruction, workdir / f"edit_{seed}.jpg", size[1] > size[0])
             except Exception as exc:  # noqa: BLE001
+                global last_error
+                last_error = str(exc)[:200]
                 log.warning("No se pudo retocar con OpenAI (%s); se usa retoque local", exc)
     level = vis.get("retoque", "suave")
     if level in (False, "no"):
