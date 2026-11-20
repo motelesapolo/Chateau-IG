@@ -37,7 +37,8 @@
 
 ### Reservas
 - Se reserva por **WhatsApp al +56 9 4971 6039**, solo mensajes (no llamadas ni audios): https://wa.me/56949716039?text=Hola%21%20Estaba%20revisando%20el%20perfil%20de%20Hotel%20Le%20Chateau
-- También en la web www.lechateau.cl y en motelesapolo.motelink.cl, o llegando directamente (sujeto a disponibilidad).
+- También se puede llegar directamente, sin reserva (sujeto a disponibilidad).
+- Web propia: en construcción. Si preguntan por una página web, invitar a reservar por WhatsApp.
 - Desde Instagram NO se hacen reservas ni se confirma disponibilidad: siempre derivar al WhatsApp.
 - Se puede reservar en cualquier momento, incluso para el mismo día. La reserva se espera 30 minutos desde la hora acordada.
 - El número de habitación se asigna al llegar a recepción, según disponibilidad (no se puede elegir una habitación puntual).
@@ -116,8 +117,6 @@ Lamento mucho que estés pasando por esto 💛 No estás solo/a. Si estás en Ch
 
 ## Enlaces permitidos
 - https://wa.me/56949716039?text=Hola%21%20Estaba%20revisando%20el%20perfil%20de%20Hotel%20Le%20Chateau
-- https://www.lechateau.cl
-- https://motelesapolo.motelink.cl
 
 ## Preguntas frecuentes
 - ¿Tienen estacionamiento? → Sí, privado y gratis en Marín 021, por orden de llegada 😊
