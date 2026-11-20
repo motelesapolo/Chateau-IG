@@ -265,6 +265,63 @@ def _openai_edit(src, instruction: str, dest: Path, portrait: bool | None, sessi
     raise RenderError(f"Ningún modelo de edición disponible ({last})")
 
 
+# ------------------------------------------------- diseños con IA + foto real
+GREEN_RULE = ("Where the photo goes, leave ONE clean area filled with flat pure chroma green #00FF00 (no texture, "
+              "no gradient, no text or objects over it, no shadow inside it). Never draw the room yourself: the real "
+              "photo will be placed there later. ")
+
+
+def green_mask(img: Image.Image) -> Image.Image | None:
+    """Máscara del área verde que dejó la IA para la foto (None si no hay una clara)."""
+    from PIL import ImageFilter
+    rgb = img.convert("RGB")
+    r, g, b = rgb.split()
+    mask = Image.merge("RGB", (r, g, b)).point(lambda v: v)  # copia
+    px_g = g.point(lambda v: 255 if v > 170 else 0)
+    px_r = r.point(lambda v: 255 if v < 120 else 0)
+    px_b = b.point(lambda v: 255 if v < 120 else 0)
+    from PIL import ImageChops
+    mask = ImageChops.multiply(ImageChops.multiply(px_g, px_r), px_b)
+    mask = mask.filter(ImageFilter.MedianFilter(5))
+    box = mask.getbbox()
+    if not box:
+        return None
+    area = (box[2] - box[0]) * (box[3] - box[1])
+    if area < img.width * img.height * 0.08:
+        return None
+    # agrandar 3 px para tapar el borde verdoso del antialiasing
+    return mask.filter(ImageFilter.MaxFilter(7))
+
+
+def place_photo(design: Image.Image, photo: Image.Image, mask: Image.Image) -> Image.Image:
+    box = mask.getbbox()
+    w, h = box[2] - box[0], box[3] - box[1]
+    fitted = ImageOps.fit(ImageOps.exif_transpose(photo).convert("RGB"), (w, h), Image.LANCZOS, centering=(0.5, 0.45))
+    layer = design.convert("RGB").copy()
+    layer.paste(fitted, box[:2], mask.crop(box))
+    return layer
+
+
+def ai_design(photo: Path, brief: str, dest: Path, size: tuple[int, int], refs: list[Path] | None = None,
+              models: list[str] | None = None) -> Path:
+    """La IA diseña la pieza completa dejando un hueco verde; ahí va la foto REAL sin modificar."""
+    ratio = ImageOps.exif_transpose(Image.open(photo)).size
+    shape = "landscape 3:2" if ratio[0] > ratio[1] * 1.2 else "portrait 4:5" if ratio[1] > ratio[0] * 1.2 else "square"
+    prompt = (f"{brief} The photo area should be roughly {shape} in proportion. {GREEN_RULE}"
+              "Image 1 is only a mood reference for colors and light: do not reproduce it. "
+              "Image 2 is the logo: reproduce it exactly, without changing its letters.")
+    raw = dest.with_suffix(".ia.jpg")
+    _openai_edit([photo, config.ROOT / "assets/brand/logo.png", *(refs or [])], prompt, raw, size[1] > size[0],
+                 models=models)
+    design = Image.open(raw).convert("RGB")
+    mask = green_mask(design)
+    if mask is None:
+        raise RenderError("La IA no dejó el espacio verde para la foto; no se usa este diseño")
+    out = place_photo(design, Image.open(photo), mask)
+    ImageOps.fit(out, size, Image.LANCZOS).save(dest, quality=95)
+    return dest
+
+
 def prepare_photo(vis: dict, size: tuple[int, int], workdir: Path, seed: int) -> Path:
     """Foto propia: retoque con IA si se pidió (y hay clave) + retoque local suave. Si la IA falla, queda el local."""
     path = config.ROOT / vis["path"]

@@ -88,6 +88,26 @@ def main() -> int:
                 panel(outs, height=1200).save(OUT / name, quality=88)
                 for label, _ in outs:
                     lines.append(f"- Diseño {d} ({diseno.get('nombre', '')}) → {label} · `{name}`")
+        for d, item in enumerate(req.get("disenos_foto", []), 1):
+            outs = []
+            for model in item.get("modelos", [None]):
+                dest = work / f"df{d}-{model}.jpg"
+                t0 = time.time()
+                try:
+                    render.ai_design(config.ROOT / item["foto"], item["brief"], dest, render.VERTICAL,
+                                     models=[model] if model else None)
+                    outs.append((f"{item.get('nombre', '')} · {render.last_engine} ({time.time() - t0:.0f} s)",
+                                 Image.open(dest)))
+                except Exception as exc:  # noqa: BLE001
+                    lines.append(f"- {item.get('nombre')} con {model}: falló ({str(exc)[:200]})")
+                    raw = dest.with_suffix(".ia.jpg")
+                    if raw.exists():
+                        outs.append((f"{item.get('nombre', '')} · SIN hueco verde", Image.open(raw)))
+            if outs:
+                name = f"foto-real-{d:02d}-{item.get('nombre', '')}.jpg"
+                panel(outs, height=1200).save(OUT / name, quality=88)
+                for label, _ in outs:
+                    lines.append(f"- {label} · `{name}`")
         for j, prompt in enumerate(req.get("generar", []), 1):
             render.last_engine = ""
             dest = work / f"gen{j}.jpg"

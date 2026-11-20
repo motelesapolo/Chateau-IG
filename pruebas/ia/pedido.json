@@ -1,39 +1,32 @@
 {
-  "fotos": [
+  "fotos": [],
+  "disenos": [],
+  "generar": [],
+  "disenos_foto": [
     {
-      "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-10.jpg",
-      "modo": "luz"
-    },
-    {
-      "path": "material/habitaciones/vip/chateaueditadas-720x720-4-1.jpg",
-      "modo": "luz"
-    }
-  ],
-  "disenos": [
-    {
-      "nombre": "historia-jacuzzi-editorial",
-      "imagenes": [
-        "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-8.jpg",
-        "assets/brand/logo.png",
-        "assets/brand/referencia-estilo.jpg"
-      ],
+      "nombre": "poster-deco",
+      "foto": "material/habitaciones/vip/chateaueditadas-720x720-4-1.jpg",
       "modelos": [
-        "gpt-image-2",
-        "gpt-image-2.6-sunburst"
-      ],
-      "prompt": "Design a polished vertical Instagram Story (9:16) for Hotel Le Chateau, an elegant couples hotel in Providencia, Santiago. Image 1 is the REAL room photo: show it inside a rounded frame with a thin gold border and a soft shadow. Image 2 is the logo: place it small at the top. Image 3 is the brand's own style reference: match its editorial, high-end look (warm cream paper texture, gold ornaments, refined spacing, elegant hierarchy). Text: small tracked kicker 'HABITACIÓN'; big title 'JACUZZI' in a tall, narrow art-deco typeface like the logo, in burgundy; subtitle 'Jacuzzi privado, con espuma incluida'; a row of three thin gold line icons labeled 'ESTACIONAMIENTO PRIVADO', 'ATENCIÓN 24/7', 'CORTESÍA DE BIENVENIDA'; a burgundy pill button 'RESERVA POR WHATSAPP'. Use the real room photo exactly as it is: do not change, add, remove or move anything inside it (same furniture, tub, tiles, walls, curtains, artwork, towels, proportions). Reproduce the logo exactly. Brand palette only: burgundy #811721, cream #FCF1E1, beige #F3D8B9, muted gold #9C6A2B. Spanish text spelled exactly as given, nothing else written. No prices, no people, nothing sexual or suggestive. Keep key content away from the top 220 px and the bottom 300 px (Instagram UI)."
-    },
-    {
-      "nombre": "gancho-reel-burdeos",
-      "imagenes": [
-        "material/habitaciones/vip/chateaueditadas-720x720-4-1.jpg",
-        "assets/brand/logo.png"
-      ],
-      "modelos": [
+        "gpt-image-2.6-sunburst",
         "gpt-image-2"
       ],
-      "prompt": "Design a cinematic vertical cover frame (9:16) for an Instagram Reel of Hotel Le Chateau. Image 1 is the REAL room photo: show it large in the upper part, fading softly into a deep burgundy background, with thin gold art-deco corner ornaments framing the composition. Image 2 is the logo: small at the top in cream. Text: small tracked gold kicker 'SIN SALIR DE PROVIDENCIA'; big cream title 'TRES FORMAS DE DESCONECTAR' in a tall, narrow art-deco typeface like the logo; a thin gold rule with a small diamond. Use the real room photo exactly as it is: do not change, add, remove or move anything inside it (same furniture, tub, tiles, walls, curtains, artwork, towels, proportions). Reproduce the logo exactly. Brand palette only: burgundy #811721, cream #FCF1E1, beige #F3D8B9, muted gold #9C6A2B. Spanish text spelled exactly as given, nothing else written. No prices, no people, nothing sexual or suggestive. Keep key content away from the top 220 px and the bottom 300 px (Instagram UI)."
+      "brief": "AVOID generic template design: no laurel leaves or botanical sprigs, no rows of circular icons, no pill-shaped buttons, no centered symmetrical flyer layout, no ribbons, no script/handwritten fonts, no clip-art ornaments, no stock 'luxury' clichés. Make bold, original art direction worthy of an award-winning design studio. Palette: burgundy #811721, deep wine #5E0F17, cream #FCF1E1, beige #F3D8B9, muted gold #9C6A2B. Titles in a tall, narrow art-deco display typeface like the logo; small text in a clean modern sans. Spanish text spelled exactly as given and nothing else written. No prices, no people, nothing sexual or suggestive. Keep key content away from the top 220 px and bottom 300 px. Vertical 9:16 Instagram Story for Hotel Le Chateau. Art direction: a 1920s Art Deco travel poster in the spirit of Cassandre: strong geometric composition, flat color planes, stepped frames and radiating lines, dramatic perspective. The photo area is a tall arched window cut into the poster. Text: 'TU PRÓXIMA PAUSA' (big), 'PROVIDENCIA · SANTIAGO' (small), 'RESERVA POR WHATSAPP' (small, discreet)."
+    },
+    {
+      "nombre": "revista",
+      "foto": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-8.jpg",
+      "modelos": [
+        "gpt-image-2.6-sunburst"
+      ],
+      "brief": "AVOID generic template design: no laurel leaves or botanical sprigs, no rows of circular icons, no pill-shaped buttons, no centered symmetrical flyer layout, no ribbons, no script/handwritten fonts, no clip-art ornaments, no stock 'luxury' clichés. Make bold, original art direction worthy of an award-winning design studio. Palette: burgundy #811721, deep wine #5E0F17, cream #FCF1E1, beige #F3D8B9, muted gold #9C6A2B. Titles in a tall, narrow art-deco display typeface like the logo; small text in a clean modern sans. Spanish text spelled exactly as given and nothing else written. No prices, no people, nothing sexual or suggestive. Keep key content away from the top 220 px and bottom 300 px. Vertical 9:16 Instagram Story for Hotel Le Chateau. Art direction: a page from a high-end interiors magazine (Kinfolk, Cereal): asymmetric grid, generous cream negative space, a huge title cropped by the edge of the page, thin gold hairlines, small editorial captions and a page number. The photo area is offset to one side, not centered. Text: 'JACUZZI' (huge, partly cropped), 'N°03 — HABITACIÓN', 'Tu propio jacuzzi, con espuma incluida', 'RESERVA POR WHATSAPP'."
+    },
+    {
+      "nombre": "cine",
+      "foto": "material/habitaciones/vip/chateaueditadas-720x720-4-1.jpg",
+      "modelos": [
+        "gpt-image-2.6-sunburst"
+      ],
+      "brief": "AVOID generic template design: no laurel leaves or botanical sprigs, no rows of circular icons, no pill-shaped buttons, no centered symmetrical flyer layout, no ribbons, no script/handwritten fonts, no clip-art ornaments, no stock 'luxury' clichés. Make bold, original art direction worthy of an award-winning design studio. Palette: burgundy #811721, deep wine #5E0F17, cream #FCF1E1, beige #F3D8B9, muted gold #9C6A2B. Titles in a tall, narrow art-deco display typeface like the logo; small text in a clean modern sans. Spanish text spelled exactly as given and nothing else written. No prices, no people, nothing sexual or suggestive. Keep key content away from the top 220 px and bottom 300 px. Vertical 9:16 Instagram Story for Hotel Le Chateau. Art direction: an elegant film title card at night, like the opening credits of a classic movie: deep wine-black background with subtle film grain, the photo area as a wide cinematic letterbox frame, title set like a film credit with generous letter spacing, a thin gold line. Text: 'TRES FORMAS DE DESCONECTAR', 'UNA ESCAPADA EN PROVIDENCIA', 'RESERVA POR WHATSAPP'."
     }
-  ],
-  "generar": []
+  ]
 }
