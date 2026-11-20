@@ -57,7 +57,7 @@
       "duration": 2.5
     }
   ],
-  "status": "rendered",
+  "status": "published",
   "media": {
     "kind": "video",
     "files": [
@@ -67,5 +67,10 @@
     "preview": "media/2026-11-20-reel-prueba-la-pausa/preview.jpg",
     "duration": 14.5,
     "size_mb": 1.78
+  },
+  "result": {
+    "media_id": "18170065696489905",
+    "permalink": "https://www.instagram.com/reel/Df-skjJlSVe/",
+    "published_at": "2026-11-20T22:10:00.306330+00:00"
   }
 }

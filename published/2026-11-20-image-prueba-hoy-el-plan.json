@@ -17,12 +17,17 @@
       "subtext": "Habitación VIP · Providencia"
     }
   ],
-  "status": "rendered",
+  "status": "published",
   "media": {
     "kind": "image",
     "files": [
       "media/2026-11-20-image-prueba-hoy-el-plan/post.jpg"
     ],
     "preview": "media/2026-11-20-image-prueba-hoy-el-plan/preview.jpg"
+  },
+  "result": {
+    "media_id": "18586615588079605",
+    "permalink": "https://www.instagram.com/p/Df-si4mmgNh/",
+    "published_at": "2026-11-20T22:10:00.306330+00:00"
   }
 }
