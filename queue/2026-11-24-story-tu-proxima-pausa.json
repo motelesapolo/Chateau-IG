@@ -1,0 +1,23 @@
+{
+  "id": "2026-11-24-story-tu-proxima-pausa",
+  "type": "story",
+  "publish_at": "2026-11-24T18:00:00-03:00",
+  "scenes": [
+    {
+      "visual": {
+        "source": "file",
+        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-10.jpg"
+      },
+      "text": "Tu próxima pausa",
+      "subtext": "Habitación Jacuzzi en Providencia"
+    }
+  ],
+  "status": "rendered",
+  "media": {
+    "kind": "image",
+    "files": [
+      "media/2026-11-24-story-tu-proxima-pausa/story.jpg"
+    ],
+    "preview": "media/2026-11-24-story-tu-proxima-pausa/preview.jpg"
+  }
+}
