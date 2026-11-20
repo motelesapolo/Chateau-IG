@@ -7,16 +7,16 @@
 
 ## La idea en una frase
 **Le Chateau es la pausa elegante de Providencia:** fotos reales con luz cálida, frases cortas con complicidad
-y series que dan ganas de guardar y mandar a la pareja. Burdeos, crema y dorado; la letra del logo.
+y series que dan ganas de guardar y mandar a la pareja. Burdeos, crema y dorado; títulos en Playfair Display.
 
 ## Los 4 formatos
 
 ### 1. FOTO + FRASE (≈40% del feed) — inspirado en Wave
 - Foto real de `material/` a pantalla completa (retocada solo en luz y color).
 - Degradado vino oscuro abajo para leer el texto. Logo crema pequeño arriba al centro.
-- Frase de 2 a 7 palabras, en la letra del logo (MAYÚSCULAS), color crema. **Una sola palabra destacada** en
-  recuadro burdeos. Opcional: una línea pequeña en Manrope debajo.
-- Ejemplos: "HOY EL PLAN ES **NO** TENER PLAN" · "UN MARTES QUE **SÍ** VALE LA PENA".
+- Frase de 2 a 7 palabras en Playfair Display, color crema. **Una sola palabra destacada** en Playfair Italic
+  dorada (o en recuadro burdeos si la foto es clara). Opcional: una línea pequeña en Manrope debajo.
+- Ejemplos: "Hoy el plan es *no* tener plan" · "Un martes que *sí* vale la pena".
 
 ### 2. SERIE (≈35%) — inspirado en Hoteles Apolo
 - Carrusel solo de texto. Portada con nombre de la serie + número, título grande, "Desliza →".
@@ -37,7 +37,7 @@ y series que dan ganas de guardar y mandar a la pareja. Burdeos, crema y dorado;
 
 ### 4. DETALLE (≈10%) — inspirado en Tout
 - Foto real de un detalle (copas, bata, toallas, espuma, la cortesía, la pizza), sin personas.
-- Texto mínimo: 1 a 3 palabras, tipo "¿Y SI…?", "SOLO PARA DOS", "SIN APURO".
+- Texto mínimo: 1 a 3 palabras, tipo "¿Y si…?", "Solo para dos", "Sin apuro".
 
 ## Historias
 - Los mismos 4 formatos en vertical (9:16). Nada importante en los 220 px de arriba ni en los 300 de abajo.
@@ -50,7 +50,8 @@ y series que dan ganas de guardar y mandar a la pareja. Burdeos, crema y dorado;
 ## Reglas visuales (siempre)
 - Paleta: rojo `#811721`, vino `#5E0F17`, crema `#FCF1E1`, beige `#F3D8B9`, arena `#F5DFC5`, dorado `#9C6A2B`
   (solo detalles). Nada de negro puro, azul, neón ni morado.
-- Tipografías: Tulpen One (títulos, MAYÚSCULAS) y Manrope (textos). Ninguna otra.
+- Tipografías: **Playfair Display** (títulos, con cursiva para la palabra destacada) y **Manrope** (textos).
+  La letra del logo (Tulpen One) va solo en el logo. Ninguna otra.
 - Logo: crema sobre oscuro, rojo sobre claro. Pequeño. Nunca deformado ni redibujado.
 - Fotos de habitaciones y del hotel: SOLO reales, sin agregar ni quitar nada.
 - Prohibido: hojitas, cintas, íconos en fila dentro de círculos, botones píldora, letra manuscrita, marcos

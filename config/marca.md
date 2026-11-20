@@ -21,11 +21,12 @@ Combinaciones: **crema sobre rojo** (la principal) · **rojo + café sobre beige
 Nada de negro puro, blancos fríos, azules ni colores neón.
 
 ## Tipografías
-- **Títulos:** Tulpen One (`assets/fonts/TulpenOne-Regular.ttf`), en MAYÚSCULAS y espaciada. Es la más
-  parecida al logo (alta, angosta, A con arco, estilo art déco). El logo es un dibujo propio: no se escribe con la fuente.
-- **Textos:** Manrope SemiBold (`assets/fonts/Manrope[wght].ttf`), limpia y moderna.
-- Máximo estas dos. Títulos de hasta ~7 palabras; el resto con Manrope.
-- Licencia de ambas: SIL Open Font License (archivos OFL en `assets/fonts/`).
+- **Títulos: Playfair Display** (`assets/fonts/PlayfairDisplay[wght].ttf`, peso Medium), en minúsculas normales
+  (no todo en mayúsculas). La palabra destacada va en **Playfair Display Italic** (`PlayfairDisplay-Italic[wght].ttf`),
+  en dorado o crema. Elegida por el dueño el 20-11-2026: se usa hasta nuevo aviso.
+- **Textos: Manrope** SemiBold (`assets/fonts/Manrope[wght].ttf`).
+- **Tulpen One / letra del logo: SOLO en el logo.** Nunca en títulos ni textos.
+- Máximo estas dos (más el logo). Licencia SIL Open Font License (archivos OFL en `assets/fonts/`).
 
 ## Fotos y videos
 - Los hace el dueño (y los edita con ChatGPT): luz cálida, tonos crema/dorado, ambiente ordenado.
@@ -34,20 +35,12 @@ Nada de negro puro, blancos fríos, azules ni colores neón.
   lo importante en el centro (el perfil las recorta a 3:4).
 
 ## Plantillas que arma el sistema
-- **Reel/historia sobre foto o video:** título en Tulpen crema dentro de un recuadro rojo semitransparente,
-  `subtext` opcional en Manrope.
-- **Tarjeta roja:** fondo rojo, logo arriba, título crema, línea dorada con rombo, subtítulo.
-- **Tarjeta clara:** fondo arena→beige, título rojo, línea dorada, texto café, logo rojo abajo.
-- **Cierre de reel:** tarjeta roja con el logo al centro (1,5–2 s).
+Las de `config/linea-editorial.md` (foto + frase, serie, gráfica de marca, detalle). Toda la tipografía la pone el
+sistema (Playfair Display + Manrope); la IA nunca escribe texto en las imágenes.
 
-## Dirección de arte (diseños con la API de ChatGPT)
-- Las piezas principales (portada/gancho de reels, historias, primera lámina de carruseles) se hacen con
-  `"source": "diseno"`: la IA diseña la pieza completa y deja un hueco; ahí va **la foto real sin modificar**.
-- **Nada genérico:** prohibido el "flyer de plantilla" (hojitas, fila de íconos en círculos, botón píldora, todo
-  centrado y simétrico, cintas, letras manuscritas). Las reglas exactas están en `config/estilos.json`.
-- **Estilos aprobados por el dueño** (`aprobados` en `config/estilos.json`): `poster-deco` (póster art déco años 20)
-  y `noche-burdeos` (foto grande arriba que se funde en burdeos, esquinas doradas art déco). Solo se usan esos.
-  `cine`, `suizo` y `collage` quedan para probar (con `"prueba": true`); `revista` NO le gustó.
-  Un estilo por reel (todas sus escenas iguales); alternar los aprobados en el perfil.
-- **Audio:** sin voz artificial (al dueño no le gustó). Reels con música de `assets/music/` cuando exista.
-- Textos cortos y exactos: `kicker`, `text` (título), `subtext`, `cta`. Sin precios salvo promo vigente.
+## Uso de la API de ChatGPT
+- **Fotos:** retoque de luz y color. Se copia solo su corrección de color sobre la foto original (la habitación no
+  cambia en nada: ni encuadre, ni letreros, ni muebles).
+- **Fondos de las gráficas de marca:** terciopelo, satén, dorado líquido, formas 3D y líneas art déco en la paleta,
+  **sin texto**. Reglas en `config/estilos.json`.
+- Los diseños completos hechos por la IA (`source: diseno`) quedaron descartados por la línea editorial.

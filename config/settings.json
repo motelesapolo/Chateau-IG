@@ -74,7 +74,7 @@
       "dorado": "#9C6A2B",
       "cafe": "#2A1C14"
     },
-    "title_font": "TulpenOne-Regular.ttf",
+    "title_font": "PlayfairDisplay[wght].ttf",
     "body_font": "Manrope[wght].ttf",
     "body_weight": "SemiBold",
     "box": "rojo",
@@ -83,7 +83,13 @@
     "text_on_light": "rojo",
     "accent": "dorado",
     "card_bg": "rojo",
-    "logo": "assets/brand/logo_crema.png"
+    "logo": "assets/brand/logo_crema.png",
+    "title_italic_font": "PlayfairDisplay-Italic[wght].ttf",
+    "title_weight": "Medium",
+    "title_case": "sentence",
+    "title_tracking": 0,
+    "title_stroke": 0,
+    "logo_font_note": "Tulpen One solo para el logo (no se usa en textos)"
   },
   "review": {
     "enabled": true,

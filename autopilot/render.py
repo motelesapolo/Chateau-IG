@@ -683,16 +683,18 @@ def text_overlay(text: str, size: tuple[int, int], position: str = "center",
     if not text and not subtext:
         return layer
     role = style if style in {"title", "body"} else ("title" if len(text) <= 48 else "body")
-    if role == "title":
+    if role == "title" and b.get("title_case", "upper") == "upper":
         text = text.upper()
     max_w = int(w * 0.80)
     blocks = []
     if text:
-        start = (190 if len(text) < 18 else 160 if len(text) < 32 else 130) if role == "title" else \
+        big = b.get("title_case", "upper") == "upper"
+        start = ((190 if len(text) < 18 else 160 if len(text) < 32 else 130) if big else
+                 (130 if len(text) < 18 else 110 if len(text) < 32 else 92)) if role == "title" else \
                 (80 if len(text) < 80 else 64)
         font, fsize, tracking, lines = _fit_block(text, role, start, max_w, 4 if role == "title" else 6, 44)
-        stroke = max(1, int(fsize * b["title_stroke"])) if role == "title" else 0
-        blocks.append((font, fsize, tracking, lines, stroke, 1.02 if role == "title" else 1.15))
+        stroke = int(fsize * b["title_stroke"]) if role == "title" else 0
+        blocks.append((font, fsize, tracking, lines, stroke, (1.02 if big else 1.08) if role == "title" else 1.15))
     if subtext:
         font, fsize, tracking, lines = _fit_block(subtext, "body", 52, max_w, 3, 34)
         blocks.append((font, fsize, 0.0, lines, 0, 1.2))

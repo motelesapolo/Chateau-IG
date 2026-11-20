@@ -183,6 +183,9 @@ def validate(item: dict) -> list[str]:
             errs.append(f"escena {i}: {src} necesita prompt")
         if src.startswith(("pixabay", "pexels")) and not vis.get("query"):
             errs.append(f"escena {i}: {src} necesita query")
+        if src == "diseno" and not item.get("prueba"):
+            errs.append(f"escena {i}: 'diseno' (diseño completo hecho por la IA) no está en la línea editorial; "
+                        "usa los formatos de config/linea-editorial.md")
         if src == "diseno":
             import json as _json
             p = config.ROOT / str(vis.get("path", ""))
