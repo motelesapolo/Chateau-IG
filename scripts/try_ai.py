@@ -72,6 +72,22 @@ def main() -> int:
             lines.append(f"- `{foto['path']}` · modo **{vis['ia_edit']}** → {render.last_engine} ({secs:.0f} s) · `{name}`")
             if render.last_error:
                 lines.append(f"  - Motivo: {render.last_error}")
+        for d, diseno in enumerate(req.get("disenos", []), 1):
+            outs = []
+            for model in diseno.get("modelos", [None]):
+                dest = work / f"dis{d}-{model}.jpg"
+                t0 = time.time()
+                try:
+                    render._openai_edit([config.ROOT / x for x in diseno["imagenes"]], diseno["prompt"], dest, True,
+                                        models=[model] if model else None)
+                    outs.append((f"{render.last_engine} ({time.time() - t0:.0f} s)", Image.open(dest)))
+                except Exception as exc:  # noqa: BLE001
+                    lines.append(f"- Diseño {d} con {model}: falló ({str(exc)[:200]})")
+            if outs:
+                name = f"diseno-{d:02d}-{diseno.get('nombre', '')}.jpg"
+                panel(outs, height=1200).save(OUT / name, quality=88)
+                for label, _ in outs:
+                    lines.append(f"- Diseño {d} ({diseno.get('nombre', '')}) → {label} · `{name}`")
         for j, prompt in enumerate(req.get("generar", []), 1):
             render.last_engine = ""
             dest = work / f"gen{j}.jpg"

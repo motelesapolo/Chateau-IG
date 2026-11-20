@@ -210,26 +210,40 @@ def edit_allowed(path: str, mode: str) -> bool:
     return mode == "luz" or not str(path).startswith(PROTECTED_DIRS)
 
 
-def _openai_edit(src: Path, instruction: str, dest: Path, portrait: bool, session=None) -> Path:
-    """Edita una foto real con la API de imágenes de OpenAI (alta fidelidad a la original)."""
-    global _openai_count
+def _openai_edit(src, instruction: str, dest: Path, portrait: bool, session=None,
+                 models: list[str] | None = None) -> Path:
+    """Edita con la API de imágenes de OpenAI. `src` puede ser una foto o una lista (foto + referencias)."""
+    global _openai_count, last_engine
     cfg = {**OPENAI_DEFAULTS, **(config.load_settings().get("openai_images") or {})}
     if _openai_count >= int(cfg["max_per_run"]):
         raise RenderError("Tope de imágenes OpenAI por ejecución alcanzado")
     http = session or requests
-    buf = BytesIO()
-    im = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
-    im.thumbnail((2048, 2048))
-    im.save(buf, "JPEG", quality=92)
+    files = []
+    for k, path in enumerate(src if isinstance(src, (list, tuple)) else [src]):
+        buf = BytesIO()
+        im = ImageOps.exif_transpose(Image.open(path))
+        im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
+        im.thumbnail((2048, 2048))
+        if im.mode == "RGBA":
+            im.save(buf, "PNG")
+            files.append(("image[]", (f"img{k}.png", buf.getvalue(), "image/png")))
+        else:
+            im.save(buf, "JPEG", quality=92)
+            files.append(("image[]", (f"img{k}.jpg", buf.getvalue(), "image/jpeg")))
     last = None
-    for model in cfg["edit_models"]:
+    for model in models or cfg["edit_models"]:
         data = {"model": model, "prompt": instruction, "n": "1", "quality": "high", "input_fidelity": "high",
                 "size": "1024x1536" if portrait else "1024x1024", "output_format": "jpeg"}
         r = http.post("https://api.openai.com/v1/images/edits",
                       headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
-                      data=data, files={"image[]": ("foto.jpg", buf.getvalue(), "image/jpeg")}, timeout=300)
+                      data=data, files=files, timeout=300)
+        if r.status_code == 400 and "input_fidelity" in r.text:
+            data.pop("input_fidelity")  # algunos modelos no aceptan este parámetro
+            r = http.post("https://api.openai.com/v1/images/edits",
+                          headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
+                          data=data, files=files, timeout=300)
         if _model_unavailable(r):
-            last = f"{model}: {r.status_code}"
+            last = f"{model}: {r.status_code} {r.text[:120]}"
             continue
         if r.status_code >= 400:
             raise RenderError(f"OpenAI (edición) respondió {r.status_code}: {r.text[:300]}")
@@ -237,10 +251,9 @@ def _openai_edit(src: Path, instruction: str, dest: Path, portrait: bool, sessio
         out = r.json()["data"][0]
         raw = base64.b64decode(out["b64_json"]) if out.get("b64_json") else http.get(out["url"], timeout=120).content
         _openai_count += 1
-        global last_engine
         last_engine = f"OpenAI {model}"
         Image.open(BytesIO(raw)).convert("RGB").save(dest, quality=95)
-        log.info("Foto retocada con OpenAI (%s)", model)
+        log.info("Imagen editada con OpenAI (%s)", model)
         return dest
     raise RenderError(f"Ningún modelo de edición disponible ({last})")
 
