@@ -26,6 +26,11 @@ Formato (lo escribe Claude en el lote semanal):
 }
 
 Fuentes de `visual`:
+  plantilla      {"formato": "foto-frase", "path": "material/..."}   ← EL ÚNICO PARA PUBLICACIONES (línea editorial)
+                 formato: foto-frase | detalle (path) · serie ("bg": rojo|arena|vino) · chat (escena "mensajes":
+                 [{"de": "a"|"b", "texto": "...", "hora": "19:42"}], "contacto") · grafica ("fondo_prompt" en inglés
+                 SIN texto, o "fondo": ruta) · cierre. Textos de la escena: kicker, text (*palabra* = destacada),
+                 subtext, cta. Fotos: retoque de color con IA (no cambia la foto); "retoque": "no" para evitarlo.
   diseno         {"path": "material/...", "estilo": "poster-deco", "brief": "(opcional)"}  (sin "path": pieza solo gráfica)
                  Pieza diseñada por la IA (API de ChatGPT) con la foto REAL puesta tal cual en el hueco que deja.
                  Textos de la escena: "kicker", "text" (título), "subtext", "cta" (se escriben exactos en el diseño).
@@ -59,7 +64,7 @@ from pathlib import Path
 from . import config
 
 TYPES = {"reel", "image", "carousel", "story"}
-SOURCES = {"diseno", "ia", "pollinations", "pixabay_photo", "pixabay_video", "pexels_photo", "pexels_video",
+SOURCES = {"plantilla", "diseno", "ia", "pollinations", "pixabay_photo", "pixabay_video", "pexels_photo", "pexels_video",
            "card", "file"}
 STATUSES = {"planned", "rendered", "render_failed", "published", "publish_failed",
             "missed", "cancelled"}
@@ -183,6 +188,18 @@ def validate(item: dict) -> list[str]:
             errs.append(f"escena {i}: {src} necesita prompt")
         if src.startswith(("pixabay", "pexels")) and not vis.get("query"):
             errs.append(f"escena {i}: {src} necesita query")
+        if src == "plantilla":
+            from . import plantillas as _pl
+            fmt = vis.get("formato")
+            if fmt not in _pl.FORMATOS:
+                errs.append(f"escena {i}: formato debe ser uno de {', '.join(sorted(_pl.FORMATOS))}")
+            if fmt in {"foto-frase", "detalle"}:
+                if not vis.get("path") or not (config.ROOT / vis["path"]).is_file():
+                    errs.append(f"escena {i}: {fmt} necesita una foto real existente en 'path'")
+            if fmt == "chat" and not (scene.get("mensajes") or vis.get("mensajes")):
+                errs.append(f"escena {i}: chat necesita 'mensajes'")
+            if fmt == "serie" and vis.get("bg", "rojo") not in _pl.FONDOS_SERIE:
+                errs.append(f"escena {i}: bg de serie debe ser rojo, arena o vino")
         if src == "diseno" and not item.get("prueba"):
             errs.append(f"escena {i}: 'diseno' (diseño completo hecho por la IA) no está en la línea editorial; "
                         "usa los formatos de config/linea-editorial.md")

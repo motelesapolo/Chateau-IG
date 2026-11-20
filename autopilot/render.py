@@ -494,10 +494,61 @@ def design_brief(vis: dict, scene: dict) -> str:
     return " ".join(x for x in (cfg["reglas"], style, vis.get("brief", ""), words) if x)
 
 
+def match_colors(src: Image.Image, ref: Image.Image) -> Image.Image:
+    """Copia la corrección de color de `ref` sobre `src` (igualando histogramas). La geometría de `src` no cambia."""
+    import numpy as np
+    s = np.asarray(src.convert("RGB")).astype(np.float64)
+    r = np.asarray(ref.convert("RGB").resize(src.size)).astype(np.float64)
+    out = np.empty_like(s)
+    for c in range(3):
+        sv, si, sc = np.unique(s[..., c].ravel(), return_inverse=True, return_counts=True)
+        rv, rc = np.unique(r[..., c].ravel(), return_counts=True)
+        out[..., c] = np.interp(np.cumsum(sc) / sc.sum(), np.cumsum(rc) / rc.sum(), rv)[si].reshape(s.shape[:2])
+    return Image.fromarray(out.clip(0, 255).astype(np.uint8))
+
+
+def grade_photo(path: Path, workdir: Path, seed: int) -> Path:
+    """Foto real con el retoque de luz/color de la IA aplicado SOLO como color (si no hay IA: retoque local)."""
+    original = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
+    out = workdir / f"grade_{seed}.jpg"
+    if os.environ.get("OPENAI_API_KEY"):
+        try:
+            ai = _openai_edit(path, EDIT_PRESETS["luz"], workdir / f"grade_ai_{seed}.jpg", None)
+            match_colors(original, Image.open(ai)).save(out, quality=95)
+            return out
+        except Exception as exc:  # noqa: BLE001
+            log.warning("Retoque con IA no disponible (%s); se usa retoque local", exc)
+    retouch(original, "suave").save(out, quality=95)
+    return out
+
+
+def plantilla_visual(vis: dict, scene: dict, size: tuple[int, int], workdir: Path, seed: int) -> Path:
+    from . import plantillas
+    data = {k: scene.get(k, "") for k in ("kicker", "text", "subtext")}
+    if "cta" in scene:
+        data["cta"] = scene["cta"]
+    data.update({k: vis[k] for k in ("bg", "posicion", "contacto", "logo") if k in vis})
+    data["mensajes"] = scene.get("mensajes", vis.get("mensajes", []))
+    if vis.get("path"):
+        data["photo"] = str(grade_photo(config.ROOT / vis["path"], workdir, seed)
+                            if vis.get("retoque", "ia") != "no" else config.ROOT / vis["path"])
+    if vis["formato"] == "grafica":
+        if vis.get("fondo"):
+            data["fondo"] = str(config.ROOT / vis["fondo"])
+        elif vis.get("fondo_prompt"):
+            try:
+                data["fondo"] = str(ai_image({"prompt": vis["fondo_prompt"]}, size, workdir / f"fondo_{seed}.jpg", seed))
+            except Exception as exc:  # noqa: BLE001
+                log.warning("Fondo con IA no disponible (%s); se usa degradado de marca", exc)
+    return plantillas.render(vis["formato"], size, data, workdir / f"plantilla_{seed}.jpg")
+
+
 def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int,
                  scene: dict | None = None) -> tuple[Path, str]:
     """Descarga/genera el visual. Devuelve (ruta, 'image'|'video'|'design')."""
     src = vis["source"]
+    if src == "plantilla":
+        return plantilla_visual(vis, scene or {}, size, workdir, seed), "design"
     if src == "diseno" and not vis.get("path"):
         # diseño solo tipográfico/gráfico (sin foto): cierres, frases, anuncios
         if os.environ.get("OPENAI_API_KEY"):

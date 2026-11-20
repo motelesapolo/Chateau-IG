@@ -2,3 +2,5 @@ requests>=2.31
 Pillow>=10.1
 edge-tts>=6.1
 pillow-heif>=0.16
+numpy>=1.26
+playwright>=1.45
