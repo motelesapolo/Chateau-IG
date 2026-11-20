@@ -1,0 +1,26 @@
+{
+  "id": "2026-11-20-story-prueba-jacuzzi",
+  "type": "story",
+  "prueba": true,
+  "publish_at": "2026-11-20T21:30:00-03:00",
+  "scenes": [
+    {
+      "visual": {
+        "source": "plantilla",
+        "formato": "foto-frase",
+        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-10.jpg",
+        "posicion": "50% 50%"
+      },
+      "text": "¿Y si este martes *no* cocinamos?",
+      "subtext": "Habitación Jacuzzi · Reserva por WhatsApp"
+    }
+  ],
+  "status": "rendered",
+  "media": {
+    "kind": "image",
+    "files": [
+      "media/2026-11-20-story-prueba-jacuzzi/story.jpg"
+    ],
+    "preview": "media/2026-11-20-story-prueba-jacuzzi/preview.jpg"
+  }
+}

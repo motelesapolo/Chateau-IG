@@ -1,0 +1,71 @@
+{
+  "id": "2026-11-20-reel-prueba-la-pausa",
+  "type": "reel",
+  "prueba": true,
+  "publish_at": "2026-11-20T21:15:00-03:00",
+  "caption": "La pausa que se merecen ✨\nSimple, VIP o Jacuzzi, a pasos de todo en Providencia. Estacionamiento privado y atención 24/7.\nGuárdalo para tu próxima escapada y reserva por WhatsApp (link en el perfil).\n#Providencia #Santiago #EscapadaEnPareja #JacuzziPrivado",
+  "scenes": [
+    {
+      "visual": {
+        "source": "plantilla",
+        "formato": "grafica",
+        "fondo_prompt": "Abstract luxury backdrop: deep burgundy velvet with soft flowing folds, thin gold art-deco lines and one glossy liquid-gold sphere, cinematic side light, empty space in the upper middle, vertical"
+      },
+      "kicker": "Hotel Le Chateau · Providencia",
+      "text": "La pausa que se *merecen*",
+      "duration": 3
+    },
+    {
+      "visual": {
+        "source": "plantilla",
+        "formato": "foto-frase",
+        "path": "material/habitaciones/vip/chateaueditadas-720x720-4-1.jpg",
+        "posicion": "35% 50%"
+      },
+      "text": "Hoy el plan es *no* tener plan",
+      "subtext": "Habitación VIP",
+      "duration": 3
+    },
+    {
+      "visual": {
+        "source": "plantilla",
+        "formato": "foto-frase",
+        "path": "material/habitaciones/simple/chateaueditadas-720x720-4-6.jpg",
+        "posicion": "50% 50%",
+        "logo": false
+      },
+      "text": "Un martes que *sí* vale la pena",
+      "subtext": "Habitación Simple",
+      "duration": 3
+    },
+    {
+      "visual": {
+        "source": "plantilla",
+        "formato": "detalle",
+        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-8.jpg",
+        "posicion": "55% 60%"
+      },
+      "text": "Tu propio *jacuzzi*",
+      "subtext": "Con espuma incluida",
+      "duration": 3
+    },
+    {
+      "visual": {
+        "source": "plantilla",
+        "formato": "cierre"
+      },
+      "duration": 2.5
+    }
+  ],
+  "status": "rendered",
+  "media": {
+    "kind": "video",
+    "files": [
+      "media/2026-11-20-reel-prueba-la-pausa/reel.mp4"
+    ],
+    "cover": "media/2026-11-20-reel-prueba-la-pausa/cover.jpg",
+    "preview": "media/2026-11-20-reel-prueba-la-pausa/preview.jpg",
+    "duration": 14.5,
+    "size_mb": 1.78
+  }
+}
