@@ -26,7 +26,7 @@ Formato (lo escribe Claude en el lote semanal):
 }
 
 Fuentes de `visual`:
-  diseno         {"path": "material/...", "estilo": "poster-deco", "brief": "(opcional)"}
+  diseno         {"path": "material/...", "estilo": "poster-deco", "brief": "(opcional)"}  (sin "path": pieza solo gráfica)
                  Pieza diseñada por la IA (API de ChatGPT) con la foto REAL puesta tal cual en el hueco que deja.
                  Textos de la escena: "kicker", "text" (título), "subtext", "cta" (se escriben exactos en el diseño).
                  Estilos en config/estilos.json (rotarlos). Sin clave/saldo o si falla: plantilla con marco.
@@ -186,7 +186,7 @@ def validate(item: dict) -> list[str]:
         if src == "diseno":
             import json as _json
             p = config.ROOT / str(vis.get("path", ""))
-            if not p.is_file():
+            if vis.get("path") and not p.is_file():
                 errs.append(f"escena {i}: no existe el archivo {vis.get('path')}")
             estilos = _json.loads((config.CONFIG_DIR / "estilos.json").read_text(encoding="utf-8"))["estilos"]
             if vis.get("estilo") and vis["estilo"] not in estilos:

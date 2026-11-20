@@ -464,10 +464,13 @@ def design_brief(vis: dict, scene: dict) -> str:
     import json
     cfg = json.loads((config.CONFIG_DIR / "estilos.json").read_text(encoding="utf-8"))
     style = cfg["estilos"].get(vis.get("estilo", ""), "")
-    texts = [f"'{t}'" for t in (scene.get("kicker"), scene.get("text"), scene.get("subtext"), scene.get("cta"))
-             if t]
-    words = ("Text to include (exactly, in this hierarchy: kicker, title, subtitle, call to action): "
-             + ", ".join(texts) + ".") if texts else "No text at all."
+    parts = [("MAIN TITLE, the biggest and most prominent text", scene.get("text")),
+             ("small kicker label above or near the title", scene.get("kicker")),
+             ("medium subtitle below the title", scene.get("subtext")),
+             ("small discreet call to action", scene.get("cta"))]
+    texts = [f"{role}: '{t}'" for role, t in parts if t]
+    words = ("Text to include, spelled exactly, respecting this hierarchy — " + "; ".join(texts) + ". "
+             "The main title must clearly dominate.") if texts else "No text at all."
     return " ".join(x for x in (cfg["reglas"], style, vis.get("brief", ""), words) if x)
 
 
@@ -475,6 +478,22 @@ def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int,
                  scene: dict | None = None) -> tuple[Path, str]:
     """Descarga/genera el visual. Devuelve (ruta, 'image'|'video'|'design')."""
     src = vis["source"]
+    if src == "diseno" and not vis.get("path"):
+        # diseño solo tipográfico/gráfico (sin foto): cierres, frases, anuncios
+        if os.environ.get("OPENAI_API_KEY"):
+            try:
+                raw = workdir / f"design_{seed}.ia.jpg"
+                models = (config.load_settings().get("openai_images") or {}).get("design_models")
+                _openai_edit([config.ROOT / "assets/brand/logo.png"],
+                             design_brief(vis, scene or {}) + " No photograph in this piece: pure graphic design. "
+                             "Image 1 is the logo: reproduce it exactly, without changing its letters.",
+                             raw, size[1] > size[0], models=models, story=size == VERTICAL)
+                out = workdir / f"design_{seed}.jpg"
+                fit_without_crop(Image.open(raw).convert("RGB"), size).save(out, quality=95)
+                return out, "design"
+            except Exception as exc:  # noqa: BLE001
+                log.warning("Diseño con IA no disponible (%s); se usa tarjeta", exc)
+        return _card({"bg": "rojo", "logo": True}, size, workdir / f"card_{seed}.jpg"), "image"
     if src == "diseno":
         if os.environ.get("OPENAI_API_KEY"):
             try:
