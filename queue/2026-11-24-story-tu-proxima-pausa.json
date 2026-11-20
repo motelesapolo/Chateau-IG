@@ -5,11 +5,14 @@
   "scenes": [
     {
       "visual": {
-        "source": "file",
-        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-10.jpg"
+        "source": "diseno",
+        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-8.jpg",
+        "estilo": "revista"
       },
-      "text": "Tu próxima pausa",
-      "subtext": "Habitación Jacuzzi en Providencia"
+      "kicker": "N°03 — HABITACIÓN",
+      "text": "Jacuzzi",
+      "subtext": "Tu propio jacuzzi, con espuma incluida",
+      "cta": "RESERVA POR WHATSAPP"
     }
   ],
   "status": "rendered",

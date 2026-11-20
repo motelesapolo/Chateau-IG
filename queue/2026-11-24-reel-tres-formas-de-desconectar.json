@@ -6,19 +6,22 @@
   "scenes": [
     {
       "visual": {
-        "source": "file",
-        "path": "material/habitaciones/vip/chateaueditadas-720x720-4-1.jpg"
+        "source": "diseno",
+        "path": "material/habitaciones/vip/chateaueditadas-720x720-4-1.jpg",
+        "estilo": "poster-deco"
       },
+      "kicker": "SIN SALIR DE PROVIDENCIA",
       "text": "Tres formas de desconectar",
-      "subtext": "sin salir de Providencia",
       "narration": "Tres formas de desconectar, sin salir de Providencia.",
       "duration": 3
     },
     {
       "visual": {
-        "source": "file",
-        "path": "material/habitaciones/simple/chateaueditadas-720x720-4-6.jpg"
+        "source": "diseno",
+        "path": "material/habitaciones/simple/chateaueditadas-720x720-4-6.jpg",
+        "estilo": "poster-deco"
       },
+      "kicker": "01",
       "text": "Simple",
       "subtext": "Acogedora y a tu ritmo",
       "narration": "La Simple: acogedora, para un rato a tu ritmo.",
@@ -26,9 +29,11 @@
     },
     {
       "visual": {
-        "source": "file",
-        "path": "material/habitaciones/vip/chateaueditadas-720x720-4-2.jpg"
+        "source": "diseno",
+        "path": "material/habitaciones/vip/chateaueditadas-720x720-4-2.jpg",
+        "estilo": "poster-deco"
       },
+      "kicker": "02",
       "text": "VIP",
       "subtext": "Más amplia y con más detalle",
       "narration": "La VIP: más amplia y con más detalle.",
@@ -36,11 +41,13 @@
     },
     {
       "visual": {
-        "source": "file",
-        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-8.jpg"
+        "source": "diseno",
+        "path": "material/habitaciones/jacuzzi/chateaueditadas-720x720-4-8.jpg",
+        "estilo": "poster-deco"
       },
+      "kicker": "03",
       "text": "Jacuzzi",
-      "subtext": "Jacuzzi privado, con espuma incluida",
+      "subtext": "Tu propio jacuzzi, con espuma incluida",
       "narration": "Y la Jacuzzi: tu propio jacuzzi, con espuma incluida.",
       "duration": 3
     },
@@ -51,7 +58,7 @@
         "logo": true
       },
       "text": "¿Cuál eliges?",
-      "subtext": "Reserva por WhatsApp · link en el perfil",
+      "subtext": "Reserva por WhatsApp",
       "narration": "¿Cuál eliges? Reserva por WhatsApp.",
       "duration": 3
     },
@@ -74,6 +81,6 @@
     "cover": "media/2026-11-24-reel-tres-formas-de-desconectar/cover.jpg",
     "preview": "media/2026-11-24-reel-tres-formas-de-desconectar/preview.jpg",
     "duration": 22.3,
-    "size_mb": 2.36
+    "size_mb": 3.84
   }
 }
