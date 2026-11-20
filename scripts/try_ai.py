@@ -64,7 +64,9 @@ def main() -> int:
             render.last_engine = "retoque local (la IA no respondió)"
             render.last_error = ""
             t0 = time.time()
-            final = Image.open(render.prepare_photo(vis, render.VERTICAL, work, i))
+            final_path = render.prepare_photo({**vis, "retoque": "no"}, render.VERTICAL, work, i)
+            final = Image.open(final_path)
+            final.convert("RGB").save(OUT / f"raw-foto-{i:02d}.jpg", quality=92)
             secs = time.time() - t0
             name = f"{i:02d}-{Path(foto['path']).stem}.jpg"
             panel([("Original", original), ("Retoque gratis", local),
@@ -113,6 +115,7 @@ def main() -> int:
             dest = work / f"gen{j}.jpg"
             try:
                 render.ai_image({"prompt": prompt}, render.VERTICAL, dest, j)
+                Image.open(dest).convert("RGB").save(OUT / f"raw-fondo-{j:02d}.jpg", quality=92)
                 name = f"gen-{j:02d}.jpg"
                 panel([(render.last_engine, Image.open(dest))]).save(OUT / name, quality=85)
                 lines.append(f"- Imagen generada {j} → {render.last_engine} · `{name}`")
