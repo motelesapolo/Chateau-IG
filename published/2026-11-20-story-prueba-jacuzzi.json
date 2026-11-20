@@ -15,12 +15,17 @@
       "subtext": "Habitación Jacuzzi · Reserva por WhatsApp"
     }
   ],
-  "status": "rendered",
+  "status": "published",
   "media": {
     "kind": "image",
     "files": [
       "media/2026-11-20-story-prueba-jacuzzi/story.jpg"
     ],
     "preview": "media/2026-11-20-story-prueba-jacuzzi/preview.jpg"
+  },
+  "result": {
+    "media_id": "18110602004197083",
+    "permalink": "https://www.instagram.com/stories/lechateau021/4034858878881285971",
+    "published_at": "2026-11-20T22:11:18.229203+00:00"
   }
 }
