@@ -575,14 +575,18 @@ def overlay_for(scene: dict, size: tuple[int, int]) -> Image.Image:
     is_card = vis["source"] == "card"
     bg = vis.get("bg", brand()["card_bg"])
     dark = is_card and is_light(bg) and is_light(vis.get("bg2", bg))
+    framed = scene.get("_framing") == "marco"
     return text_overlay(scene.get("text", ""), size, default_position(scene, size),
-                        boxed=not is_card, dark_text=dark, subtext=scene.get("subtext", ""),
-                        style=scene.get("style", "auto"), divider=is_card and bool(scene.get("text")))
+                        boxed=not (is_card or framed), dark_text=dark, subtext=scene.get("subtext", ""),
+                        style=scene.get("style", "auto"),
+                        divider=(is_card or framed) and bool(scene.get("text")))
 
 
 def default_position(scene: dict, size: tuple[int, int]) -> str:
     if scene.get("text_position"):
         return scene["text_position"]
+    if scene.get("_framing") == "marco":
+        return "bottom" if size == VERTICAL else "lower"
     if scene["visual"]["source"] == "card":
         vis = scene["visual"]
         if vis.get("logo") and vis.get("logo_position", "top") == "bottom":
@@ -591,10 +595,45 @@ def default_position(scene: dict, size: tuple[int, int]) -> str:
     return "upper" if size == VERTICAL else "lower"
 
 
-def compose_still(src: Path, scene: dict, size: tuple[int, int], dest: Path) -> Path:
-    img = Image.open(src)
+def choose_framing(src: Path, size: tuple[int, int], wanted: str = "auto") -> str:
+    """'recorte' llena el cuadro; 'marco' muestra la foto completa sobre un fondo de marca.
+    En 'auto' se usa marco cuando recortar obligaría a agrandar la foto más de 1,8 veces (se vería borrosa)."""
+    if wanted in {"recorte", "marco"}:
+        return wanted
+    iw, ih = ImageOps.exif_transpose(Image.open(src)).size
+    return "marco" if max(size[0] / iw, size[1] / ih) > 1.8 else "recorte"
+
+
+def frame_photo(img: Image.Image, size: tuple[int, int], framing: str) -> Image.Image:
+    from PIL import ImageFilter
     img = ImageOps.exif_transpose(img).convert("RGB")
-    img = ImageOps.fit(img, size, Image.LANCZOS, centering=(0.5, 0.4))
+    if framing != "marco":
+        return ImageOps.fit(img, size, Image.LANCZOS, centering=(0.5, 0.4))
+    w, h = size
+    # Fondo: la misma foto desenfocada, oscurecida y teñida con el rojo de la marca.
+    bg = ImageOps.fit(img, (w // 4, h // 4), Image.LANCZOS).filter(ImageFilter.GaussianBlur(10))
+    bg = bg.resize(size, Image.LANCZOS)
+    bg = Image.blend(bg, Image.new("RGB", size, color("rojo")), 0.62)
+    # Foto completa con esquinas redondeadas y borde dorado.
+    pw = int(w * 0.88)
+    ph = int(img.height * pw / img.width)
+    if ph > h * 0.62:
+        ph = int(h * 0.62)
+        pw = int(img.width * ph / img.height)
+    photo = img.resize((pw, ph), Image.LANCZOS)
+    radius = 28
+    mask = Image.new("L", (pw, ph), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, pw - 1, ph - 1], radius=radius, fill=255)
+    cy = int(h * (0.44 if h > w * 1.5 else 0.40))
+    x, y = (w - pw) // 2, cy - ph // 2
+    bg.paste(photo, (x, y), mask)
+    ImageDraw.Draw(bg).rounded_rectangle([x - 2, y - 2, x + pw + 1, y + ph + 1], radius=radius + 2,
+                                         outline=color("dorado"), width=3)
+    return bg
+
+
+def compose_still(src: Path, scene: dict, size: tuple[int, int], dest: Path) -> Path:
+    img = frame_photo(Image.open(src), size, scene.get("_framing", "recorte"))
     out = Image.alpha_composite(img.convert("RGBA"), overlay_for(scene, size)).convert("RGB")
     out.save(dest, "JPEG", quality=92, optimize=True)
     return dest
@@ -624,16 +663,16 @@ def has_audio(path: Path) -> bool:
 
 
 def scene_clip(src: Path, kind: str, overlay_png: Path, audio: Path | None, duration: float,
-               dest: Path, zoom_in: bool = True, keep_audio: bool = False) -> Path:
+               dest: Path, zoom_in: bool = True, keep_audio: bool = False, framing: str = "recorte") -> Path:
     w, h = VERTICAL
     frames = int(round(duration * 30))
     cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
     if kind == "image":
         fitted = dest.with_suffix(".fit.jpg")
-        img = ImageOps.fit(ImageOps.exif_transpose(Image.open(src)).convert("RGB"), VERTICAL,
-                           Image.LANCZOS, centering=(0.5, 0.4))
+        img = frame_photo(Image.open(src), VERTICAL, framing)
         img.save(fitted, quality=94)
-        z = f"min(1+0.10*on/{frames},1.10)" if zoom_in else f"max(1.10-0.10*on/{frames},1.0)"
+        amt = 0.05 if framing == "marco" else 0.10
+        z = f"min(1+{amt}*on/{frames},{1 + amt})" if zoom_in else f"max({1 + amt}-{amt}*on/{frames},1.0)"
         cmd += ["-loop", "1", "-framerate", "30", "-t", f"{duration:.3f}", "-i", str(fitted)]
         vchain = (f"[0:v]scale={w * 2}:{h * 2},zoompan=z='{z}':x='iw/2-(iw/zoom/2)':"
                   f"y='ih/2-(ih/zoom/2)':d=1:s={w}x{h}:fps=30,setsar=1,format=yuv420p[bg]")
@@ -740,6 +779,8 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
                 src, kind = fetch_visual(scene["visual"], size, work, seed_for(item["id"], i))
                 if kind != "image":
                     raise RenderError("Las imágenes de feed no pueden venir de un video")
+                scene = {**scene, "_framing": "recorte" if scene["visual"]["source"] == "card"
+                         else choose_framing(src, size, scene["visual"].get("encuadre", "auto"))}
                 name = "story.jpg" if t == "story" else ("post.jpg" if t == "image" else f"slide_{i:02d}.jpg")
                 files.append(compose_still(src, scene, size, out_dir / name))
             preview = contact_sheet(files, out_dir / "preview.jpg", f"{item['id']} · {t}")
@@ -749,6 +790,9 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
         clips, mids, elapsed = [], [], 0.0
         for i, scene in enumerate(item["scenes"], 1):
             src, kind = fetch_visual(scene["visual"], VERTICAL, work, seed_for(item["id"], i))
+            framing = "recorte" if kind != "image" or scene["visual"]["source"] == "card" else \
+                choose_framing(src, VERTICAL, scene["visual"].get("encuadre", "auto"))
+            scene = {**scene, "_framing": framing}
             overlay = work / f"overlay_{i}.png"
             overlay_for(scene, VERTICAL).save(overlay)
             audio = tts(scene.get("narration", ""), voice, rate, work / f"voice_{i}.mp3")
@@ -759,7 +803,7 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
             if audio:
                 dur = max(dur, media_duration(audio) + 0.35)
             clip = scene_clip(src, kind, overlay, audio, dur, work / f"clip_{i:02d}.mp4",
-                              zoom_in=i % 2 == 1, keep_audio=bool(scene.get("keep_audio")))
+                              zoom_in=i % 2 == 1, keep_audio=bool(scene.get("keep_audio")), framing=framing)
             clips.append(clip)
             mids.append(elapsed + dur / 2)
             elapsed += dur

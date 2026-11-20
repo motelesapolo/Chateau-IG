@@ -37,6 +37,8 @@ Fuentes de `visual`:
                  ("logo_position": "top" | "center" | "bottom"). Sobre fondo claro el texto va en rojo.
   file           {"path": "material/habitaciones/jacuzzi/foto.jpg"}  foto o video real del hotel
                  Fotos: "retoque": "suave" (por defecto, local y gratis) | "fuerte" | "no".
+                 "encuadre": "auto" (por defecto) | "recorte" (llena el cuadro) | "marco" (foto completa con
+                   borde dorado sobre fondo rojo desenfocado; auto lo usa si recortar dejaría la foto borrosa).
                  "ia_edit": retoque con la API de OpenAI (si hay OPENAI_API_KEY; si falla, queda el local):
                    "luz"   → solo luz y color, conserva todo lo demás. Se puede usar en habitaciones.
                    "fondo" → cambia solo el fondo (comida, tragos, productos). NO en habitaciones/espacios.
