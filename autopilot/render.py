@@ -542,7 +542,7 @@ def text_overlay(text: str, size: tuple[int, int], position: str = "center",
         heights.append(int((ascent + descent) * lh))
     block_h = sum(hgt * len(bl[3]) for hgt, bl in zip(heights, blocks)) + gap + (40 if divider else 0)
     block_w = max(int(_tracked_len(l, bl[0], bl[2])) for bl in blocks for l in bl[3])
-    centers = {"top": 0.20, "upper": 0.30, "center": 0.50, "lower": 0.72, "bottom": 0.78}
+    centers = {"top": 0.20, "upper": 0.30, "center": 0.50, "lower": 0.72, "below": 0.75, "bottom": 0.78}
     cy = int(h * centers.get(position, 0.5))
     y = max(int(h * 0.10), cy - block_h // 2)
     draw = ImageDraw.Draw(layer)
@@ -586,7 +586,7 @@ def default_position(scene: dict, size: tuple[int, int]) -> str:
     if scene.get("text_position"):
         return scene["text_position"]
     if scene.get("_framing") == "marco":
-        return "bottom" if size == VERTICAL else "lower"
+        return "below"
     if scene["visual"]["source"] == "card":
         vis = scene["visual"]
         if vis.get("logo") and vis.get("logo_position", "top") == "bottom":
@@ -624,7 +624,7 @@ def frame_photo(img: Image.Image, size: tuple[int, int], framing: str) -> Image.
     radius = 28
     mask = Image.new("L", (pw, ph), 0)
     ImageDraw.Draw(mask).rounded_rectangle([0, 0, pw - 1, ph - 1], radius=radius, fill=255)
-    cy = int(h * (0.44 if h > w * 1.5 else 0.40))
+    cy = int(h * (0.40 if h > w * 1.5 else 0.38))
     x, y = (w - pw) // 2, cy - ph // 2
     bg.paste(photo, (x, y), mask)
     ImageDraw.Draw(bg).rounded_rectangle([x - 2, y - 2, x + pw + 1, y + ph + 1], radius=radius + 2,
@@ -632,8 +632,19 @@ def frame_photo(img: Image.Image, size: tuple[int, int], framing: str) -> Image.
     return bg
 
 
+def _paste_logo(img: Image.Image, max_w: float, top: float) -> None:
+    logo_file = config.ROOT / brand()["logo"]
+    if not logo_file.is_file():
+        return
+    logo = Image.open(logo_file).convert("RGBA")
+    logo.thumbnail((int(img.width * max_w), int(img.height * 0.12)), Image.LANCZOS)
+    img.paste(logo, ((img.width - logo.width) // 2, int(img.height * top)), logo)
+
+
 def compose_still(src: Path, scene: dict, size: tuple[int, int], dest: Path) -> Path:
     img = frame_photo(Image.open(src), size, scene.get("_framing", "recorte"))
+    if scene.get("_framing") == "marco" and size == VERTICAL and scene.get("logo", True):
+        _paste_logo(img, 0.30, 0.05)  # historias con marco: logo arriba
     out = Image.alpha_composite(img.convert("RGBA"), overlay_for(scene, size)).convert("RGB")
     out.save(dest, "JPEG", quality=92, optimize=True)
     return dest
