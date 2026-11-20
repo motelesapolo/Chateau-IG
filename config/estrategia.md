@@ -50,9 +50,10 @@ Pilares (repartir en la semana): desconexión y descanso · habitaciones reales 
 
 ## 5. Horarios (Chile)
 Punto de partida (se corrige con nuestros datos cuando la cuenta pase ~100 seguidores):
-- Publicación principal **13:00** (pausa de almuerzo) y **20:30** (cuando las parejas planifican la noche).
-- **Jueves y viernes** el post de la tarde va a las **18:30**: es cuando se arma el plan del fin de semana.
-- Domingo **20:30**: "plan para la semana".
+- Publicación principal **13:00** (pausa de almuerzo) y **20:00** (cuando las parejas planifican la noche).
+- **Siempre a la hora en punto**: el sistema revisa cada hora a los :03 y publica lo que corresponde.
+- **Jueves y viernes** el post de la tarde va a las **18:00**: es cuando se arma el plan del fin de semana.
+- Domingo **20:00**: "plan para la semana".
 - Historias a las **11:00**.
 - Las publicaciones más fuertes de la semana (el mejor reel) van **jueves o viernes**.
 

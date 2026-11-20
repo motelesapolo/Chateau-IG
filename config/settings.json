@@ -36,15 +36,16 @@
     "story": 7,
     "post_times": [
       "13:00",
-      "20:30"
+      "20:00"
     ],
     "story_time": "11:00",
     "first_publish": {
       "weekday": "monday",
       "story": "18:00",
-      "post": "20:30"
+      "post": "20:00"
     },
-    "note": "Por ahora SOLO imágenes (sin videos ni reels), por decisión del dueño (2026-11-20). El lunes se reserva para que el dueño revise: lo primero sale el lunes 18:00."
+    "note": "Por ahora SOLO imágenes (sin videos ni reels), por decisión del dueño (2026-11-20). El lunes se reserva para que el dueño revise: lo primero sale el lunes 18:00.",
+    "hora_en_punto": "Publicar siempre a la hora en punto (XX:00): el sistema revisa cada hora a los :03."
   },
   "openai_images": {
     "model": "gpt-image-2",

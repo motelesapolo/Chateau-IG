@@ -120,3 +120,13 @@ def test_review_unavailable_publishes_nothing(env, monkeypatch):
     rendered("espera-1", datetime.now(timezone.utc) - timedelta(minutes=5))
     assert publish_due.main() == 0 and not FakeIG.calls
     assert q.load(config.QUEUE_DIR / "espera-1.json")["status"] == "rendered"
+
+
+def test_pick_audio_matches_words():
+    class C:
+        def search_audio(self, q):
+            return [{"audio_id": "1", "title": "Otra cosa", "display_artist": "X"},
+                    {"audio_id": "2", "title": "Lo-fi Night", "display_artist": "Chill Band"}]
+    assert publish_due.pick_audio(C(), {"buscar": "lo-fi night chill"})[0] == "2"
+    assert publish_due.pick_audio(C(), {"buscar": "zzzz"})[0] is None
+    assert publish_due.pick_audio(C(), {"audio_id": "99"})[0] == "99"

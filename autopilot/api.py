@@ -133,7 +133,14 @@ class InstagramClient:
         return (data.get("data") or [{}])[0]
 
     # ------------------------------------------------------------ publicar
-    OPTIONAL_PARAMS = ("is_ai_generated", "location_id", "collaborators", "alt_text")
+    OPTIONAL_PARAMS = ("is_ai_generated", "location_id", "collaborators", "alt_text", "audio_configuration")
+
+    def search_audio(self, query: str = "", audio_type: str = "music") -> list[dict]:
+        """Música de la biblioteca de Instagram autorizada para publicar por API (Audio API)."""
+        params = {"audio_type": audio_type, "user_id": self.ig_id}
+        if query:
+            params["search_query"] = query
+        return self.request("GET", "ig_audio", params=params).get("data", [])
 
     def _create_container(self, params: dict, ai_generated: bool, extra: dict | None = None) -> str:
         """Crea el contenedor. Los parámetros opcionales que la API rechace se quitan y se reintenta."""

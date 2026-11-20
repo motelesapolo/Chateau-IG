@@ -46,7 +46,7 @@ paso 1 falle. Al final deja un resumen corto.
   **Por ahora solo imágenes: nada de reels ni historias en video** (`reel: 0`). Todo es `image`, `carousel` o
   `story` con imagen fija.
 - **El lunes no se publica nada antes de las 18:00** (es el día de revisión del dueño): ese día solo la
-  historia a las 18:00 y el post a las 20:30. De martes a domingo, los horarios normales.
+  historia a las 18:00 y el post a las 20:00. **Todas las horas en punto (XX:00).** De martes a domingo, los horarios normales.
 - Horarios: usa los de `config/estrategia.md` §5 (jueves/viernes tarde a las 18:30) y conviértelos con
   `python scripts/when.py "AAAA-MM-DD HH:MM"` (zona horaria correcta). El mejor reel de la semana va jueves o viernes.
 - Reparte los pilares de contenido de la persona. Cada publicación con un objetivo claro

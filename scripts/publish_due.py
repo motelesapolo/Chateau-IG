@@ -2,6 +2,7 @@
 
 Uso: python scripts/publish_due.py        (DRY_RUN=1 para simular sin publicar)
 """
+import json
 import logging
 import sys
 from datetime import datetime, timezone
@@ -14,8 +15,39 @@ from autopilot.api import InstagramClient, InstagramError, client_from_env
 log = logging.getLogger("publish")
 
 
-def extras(item: dict, settings: dict) -> dict:
+def pick_audio(client: InstagramClient, music: dict) -> tuple[str | None, str]:
+    """Resuelve la música pedida: {"audio_id": ...} o {"buscar": "artista canción"}. Devuelve (id, descripción)."""
+    if music.get("audio_id"):
+        return str(music["audio_id"]), music.get("nombre", music["audio_id"])
+    query = (music.get("buscar") or "").strip()
+    if not query:
+        return None, ""
+    try:
+        found = client.search_audio(query)
+    except Exception as exc:  # noqa: BLE001
+        log.warning("No se pudo buscar la música '%s': %s", query, exc)
+        return None, ""
+    words = [w for w in query.lower().split() if len(w) > 2]
+    def score(a: dict) -> int:
+        text = f"{a.get('title', '')} {a.get('display_artist', '')}".lower()
+        return sum(w in text for w in words)
+    best = max(found, key=score, default=None)
+    if not best or score(best) == 0:
+        return None, ""
+    return str(best["audio_id"]), f"{best.get('title')} — {best.get('display_artist')}"
+
+
+def extras(item: dict, settings: dict, client: InstagramClient | None = None) -> dict:
     out = {}
+    music = item.get("musica")
+    if item.get("type") == "reel" and music and client is not None:
+        audio_id, name = pick_audio(client, music)
+        if audio_id:
+            vol = int(music.get("volumen", 100))
+            out["audio_configuration"] = json.dumps({"audio_id": audio_id, "audio_volume": max(1, min(vol, 100))})
+            item["musica_usada"] = name
+        else:
+            item["musica_usada"] = "no encontrada: se publicó sin música"
     if settings.get("location_id"):
         out["location_id"] = str(settings["location_id"])
     if item.get("collaborators"):
@@ -27,7 +59,7 @@ def extras(item: dict, settings: dict) -> dict:
 
 def publish_one(client: InstagramClient, item: dict, sha: str, ai: bool, settings: dict | None = None) -> dict:
     media = item["media"]
-    extra = extras(item, settings or {})
+    extra = extras(item, settings or {}, client)
     urls = [hosting.reachable_url(f, sha) for f in media["files"]]
     caption = item.get("caption", "")
     t = item["type"]

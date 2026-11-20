@@ -20,6 +20,8 @@ Formato (lo escribe Claude en el lote semanal):
   ],
   "music": "assets/music/archivo.mp3",       # opcional
   "cover": "material/portadas/archivo.jpg",  # opcional: portada propia del reel (se ajusta a 9:16)
+  "musica": {"buscar": "artista canción", "volumen": 100},  # opcional (reels): música de la biblioteca de
+                                             # Instagram, se busca al publicar; o {"audio_id": "..."}
   "collaborators": ["cuenta_aliada"],        # opcional: post en colaboración (hasta 3 cuentas)
   "alt_text": "Descripción de la imagen",    # opcional: accesibilidad y búsqueda (imagen/carrusel)
   "status": "planned"                        # planned → rendered → published
