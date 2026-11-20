@@ -8,7 +8,7 @@ y puede desmarcar o pedir cambios (los aplica `/revision-lunes`). Sigue siguiend
 paso 1 falle. Al final deja un resumen corto.
 
 ## 1. Revisar que se puede trabajar
-- Lee `CLAUDE.md`, `config/persona.md`, **`config/marca.md`** (paleta, tipografías, logo), **`config/estrategia.md`** (cómo crecer: formatos, horarios, SEO, CTA),
+- Lee `CLAUDE.md`, **`config/linea-editorial.md` (obligatoria: cada pieza es uno de sus 4 formatos)**, `config/persona.md`, **`config/marca.md`** (paleta, tipografías, logo), **`config/estrategia.md`** (cómo crecer: formatos, horarios, SEO, CTA),
   `config/settings.json` y la cabecera de `autopilot/queue.py`.
 - Si `config/persona.md` todavía tiene `[COMPLETAR`, **detente** y explica qué falta completar.
 - **Promos:** lee `config/promos.json`. Luego revisa los comentarios del dueño (author_association OWNER, MEMBER o
