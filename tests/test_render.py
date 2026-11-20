@@ -196,4 +196,5 @@ def test_design_brief_has_rules_style_and_exact_texts(project):
     from autopilot import render
     brief = render.design_brief({"estilo": "cine"}, {"text": "Tu próxima pausa", "cta": "RESERVA POR WHATSAPP"})
     assert "AVOID generic" in brief and "film title card" in brief
-    assert "'Tu próxima pausa', 'RESERVA POR WHATSAPP'" in brief
+    assert "MAIN TITLE, the biggest and most prominent text: 'Tu próxima pausa'" in brief
+    assert "call to action: 'RESERVA POR WHATSAPP'" in brief
