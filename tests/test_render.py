@@ -176,3 +176,24 @@ def test_unverified_org_tries_next_model():
     from autopilot import render
     assert render._model_unavailable(_Resp(403, text="Your organization must be verified to use the model gpt-image-2"))
     assert not render._model_unavailable(_Resp(400, text="Your request was rejected by the safety system (prompt)"))
+
+
+
+def test_green_slot_gets_the_real_photo():
+    from PIL import Image, ImageDraw
+    from autopilot import render
+    design = Image.new("RGB", (1024, 1536), (129, 23, 33))
+    ImageDraw.Draw(design).rounded_rectangle([100, 300, 924, 860], radius=60, fill=(0, 255, 0))
+    mask = render.green_mask(design)
+    assert mask is not None and mask.getbbox()[0] <= 100
+    photo = Image.new("RGB", (720, 480), (10, 200, 250))
+    out = render.place_photo(design, photo, mask)
+    assert out.getpixel((512, 580)) == (10, 200, 250) and out.getpixel((40, 40)) == (129, 23, 33)
+    assert render.green_mask(Image.new("RGB", (500, 800), (129, 23, 33))) is None
+
+
+def test_design_brief_has_rules_style_and_exact_texts(project):
+    from autopilot import render
+    brief = render.design_brief({"estilo": "cine"}, {"text": "Tu próxima pausa", "cta": "RESERVA POR WHATSAPP"})
+    assert "AVOID generic" in brief and "film title card" in brief
+    assert "'Tu próxima pausa', 'RESERVA POR WHATSAPP'" in brief

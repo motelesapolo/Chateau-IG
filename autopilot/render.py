@@ -459,9 +459,30 @@ def _card(vis: dict, size: tuple[int, int], dest: Path) -> Path:
     return dest
 
 
-def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int) -> tuple[Path, str]:
-    """Descarga/genera el visual. Devuelve (ruta, 'image'|'video')."""
+def design_brief(vis: dict, scene: dict) -> str:
+    """Arma el pedido para un diseño con IA: reglas anti-genéricas + estilo + textos exactos de la escena."""
+    import json
+    cfg = json.loads((config.CONFIG_DIR / "estilos.json").read_text(encoding="utf-8"))
+    style = cfg["estilos"].get(vis.get("estilo", ""), "")
+    texts = [f"'{t}'" for t in (scene.get("kicker"), scene.get("text"), scene.get("subtext"), scene.get("cta"))
+             if t]
+    words = ("Text to include (exactly, in this hierarchy: kicker, title, subtitle, call to action): "
+             + ", ".join(texts) + ".") if texts else "No text at all."
+    return " ".join(x for x in (cfg["reglas"], style, vis.get("brief", ""), words) if x)
+
+
+def fetch_visual(vis: dict, size: tuple[int, int], workdir: Path, seed: int,
+                 scene: dict | None = None) -> tuple[Path, str]:
+    """Descarga/genera el visual. Devuelve (ruta, 'image'|'video'|'design')."""
     src = vis["source"]
+    if src == "diseno":
+        if os.environ.get("OPENAI_API_KEY"):
+            try:
+                photo = prepare_photo(vis, size, workdir, seed)
+                return ai_design(photo, design_brief(vis, scene or {}), workdir / f"design_{seed}.jpg", size), "design"
+            except Exception as exc:  # noqa: BLE001
+                log.warning("Diseño con IA no disponible (%s); se usa la plantilla con marco", exc)
+        return prepare_photo(vis, size, workdir, seed), "image"
     if src in {"pollinations", "ia"}:
         return ai_image(vis, size, workdir / f"ai_{seed}.jpg", seed), "image"
     if src in {"pixabay_photo", "pixabay_video"}:
@@ -884,11 +905,15 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
             size = VERTICAL if t == "story" else FEED
             files = []
             for i, scene in enumerate(item["scenes"], 1):
-                src, kind = fetch_visual(scene["visual"], size, work, seed_for(item["id"], i))
-                if kind != "image":
+                src, kind = fetch_visual(scene["visual"], size, work, seed_for(item["id"], i), scene)
+                if kind == "design":  # diseño terminado: ya trae sus textos
+                    scene = {**scene, "text": "", "subtext": "", "_framing": "recorte", "logo": False}
+                    kind = "image"
+                elif kind != "image":
                     raise RenderError("Las imágenes de feed no pueden venir de un video")
-                scene = {**scene, "_framing": "recorte" if scene["visual"]["source"] == "card"
-                         else choose_framing(src, size, scene["visual"].get("encuadre", "auto"))}
+                else:
+                    scene = {**scene, "_framing": "recorte" if scene["visual"]["source"] == "card"
+                             else choose_framing(src, size, scene["visual"].get("encuadre", "auto"))}
                 name = "story.jpg" if t == "story" else ("post.jpg" if t == "image" else f"slide_{i:02d}.jpg")
                 files.append(compose_still(src, scene, size, out_dir / name))
             preview = contact_sheet(files, out_dir / "preview.jpg", f"{item['id']} · {t}")
@@ -897,9 +922,14 @@ def render_item(item: dict, settings: dict | None = None) -> dict:
 
         clips, mids, elapsed = [], [], 0.0
         for i, scene in enumerate(item["scenes"], 1):
-            src, kind = fetch_visual(scene["visual"], VERTICAL, work, seed_for(item["id"], i))
-            framing = "recorte" if kind != "image" or scene["visual"]["source"] == "card" else \
-                choose_framing(src, VERTICAL, scene["visual"].get("encuadre", "auto"))
+            src, kind = fetch_visual(scene["visual"], VERTICAL, work, seed_for(item["id"], i), scene)
+            if kind == "design":
+                scene = {**scene, "text": "", "subtext": ""}
+                kind = "image"
+                framing = "recorte"
+            else:
+                framing = "recorte" if kind != "image" or scene["visual"]["source"] == "card" else \
+                    choose_framing(src, VERTICAL, scene["visual"].get("encuadre", "auto"))
             scene = {**scene, "_framing": framing}
             overlay = work / f"overlay_{i}.png"
             overlay_for(scene, VERTICAL).save(overlay)

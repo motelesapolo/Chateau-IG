@@ -26,6 +26,10 @@ Formato (lo escribe Claude en el lote semanal):
 }
 
 Fuentes de `visual`:
+  diseno         {"path": "material/...", "estilo": "poster-deco", "brief": "(opcional)"}
+                 Pieza diseñada por la IA (API de ChatGPT) con la foto REAL puesta tal cual en el hueco que deja.
+                 Textos de la escena: "kicker", "text" (título), "subtext", "cta" (se escriben exactos en el diseño).
+                 Estilos en config/estilos.json (rotarlos). Sin clave/saldo o si falla: plantilla con marco.
   ia             {"prompt": "...", "quality": "high"}     imagen IA: OpenAI si hay OPENAI_API_KEY, si no Pollinations
   pollinations   {"prompt": "...", "seed": 7}             igual que "ia" (nombre antiguo); "engine": "pollinations" fuerza la gratis
                  Prompts de IA: en inglés, fotográficos y concretos (luz, encuadre, lente, materiales).
@@ -55,7 +59,7 @@ from pathlib import Path
 from . import config
 
 TYPES = {"reel", "image", "carousel", "story"}
-SOURCES = {"ia", "pollinations", "pixabay_photo", "pixabay_video", "pexels_photo", "pexels_video",
+SOURCES = {"diseno", "ia", "pollinations", "pixabay_photo", "pixabay_video", "pexels_photo", "pexels_video",
            "card", "file"}
 STATUSES = {"planned", "rendered", "render_failed", "published", "publish_failed",
             "missed", "cancelled"}
@@ -179,6 +183,14 @@ def validate(item: dict) -> list[str]:
             errs.append(f"escena {i}: {src} necesita prompt")
         if src.startswith(("pixabay", "pexels")) and not vis.get("query"):
             errs.append(f"escena {i}: {src} necesita query")
+        if src == "diseno":
+            import json as _json
+            p = config.ROOT / str(vis.get("path", ""))
+            if not p.is_file():
+                errs.append(f"escena {i}: no existe el archivo {vis.get('path')}")
+            estilos = _json.loads((config.CONFIG_DIR / "estilos.json").read_text(encoding="utf-8"))["estilos"]
+            if vis.get("estilo") and vis["estilo"] not in estilos:
+                errs.append(f"escena {i}: estilo '{vis['estilo']}' no existe ({', '.join(estilos)})")
         if src == "file":
             p = config.ROOT / str(vis.get("path", ""))
             if not p.is_file():

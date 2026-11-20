@@ -39,3 +39,14 @@ Nada de negro puro, blancos fríos, azules ni colores neón.
 - **Tarjeta roja:** fondo rojo, logo arriba, título crema, línea dorada con rombo, subtítulo.
 - **Tarjeta clara:** fondo arena→beige, título rojo, línea dorada, texto café, logo rojo abajo.
 - **Cierre de reel:** tarjeta roja con el logo al centro (1,5–2 s).
+
+## Dirección de arte (diseños con la API de ChatGPT)
+- Las piezas principales (portada/gancho de reels, historias, primera lámina de carruseles) se hacen con
+  `"source": "diseno"`: la IA diseña la pieza completa y deja un hueco; ahí va **la foto real sin modificar**.
+- **Nada genérico:** prohibido el "flyer de plantilla" (hojitas, fila de íconos en círculos, botón píldora, todo
+  centrado y simétrico, cintas, letras manuscritas). Las reglas exactas están en `config/estilos.json`.
+- **Estilos para rotar** (`config/estilos.json`): `poster-deco` (póster art déco años 20), `revista` (página de
+  revista de interiores, asimétrica), `cine` (cartel de créditos de película de noche), `suizo` (grilla tipográfica),
+  `collage` (papel recortado con dorado). Un estilo por reel (todas sus escenas iguales); no repetir el mismo estilo
+  más de 2 veces seguidas en el perfil.
+- Textos cortos y exactos: `kicker`, `text` (título), `subtext`, `cta`. Sin precios salvo promo vigente.

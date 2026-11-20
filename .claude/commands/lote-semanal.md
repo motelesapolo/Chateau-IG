@@ -60,6 +60,11 @@ Reglas de calidad:
 - **Imágenes:** una idea fuerte, texto corto encima o ninguno.
 - **Historias (1 diaria):** avisos del post del día, preguntas, detrás de escena. Imagen con texto corto.
 - **Visuales:**
+  - **Diseños con IA (`source: diseno`)**: úsalos en la portada/gancho de cada reel (y en todas sus escenas con foto
+    si quieres el reel completo diseñado, siempre con el MISMO estilo), en las historias con foto y en la primera
+    lámina de los carruseles. Elige el `estilo` rotando los de `config/estilos.json` (ver `config/marca.md`).
+    Pon los textos en `kicker`, `text`, `subtext` y `cta` (cortos). Al revisar las vistas previas, comprueba que la
+    IA escribió bien los textos y que el diseño no es genérico; si falla, corrige con `"replace": true`.
   - **Prioridad:** 1) `material/listos/` (se publica tal cual) · 2) fotos y videos propios de `material/`
     (videos con `keep_audio: true` y sin `duration` si se usan completos) · 3) tarjetas `card` con la paleta
     de `config/marca.md` (`bg`: rojo/beige/arena, `logo: true`) · 4) IA solo si falta material de ambiente.
