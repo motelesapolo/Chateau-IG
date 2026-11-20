@@ -53,12 +53,12 @@
     },
     {
       "visual": {
-        "source": "card",
-        "bg": "rojo",
-        "logo": true
+        "source": "diseno",
+        "estilo": "poster-deco"
       },
+      "kicker": "SIMPLE · VIP · JACUZZI",
       "text": "¿Cuál eliges?",
-      "subtext": "Reserva por WhatsApp",
+      "cta": "RESERVA POR WHATSAPP",
       "narration": "¿Cuál eliges? Reserva por WhatsApp.",
       "duration": 3
     },
@@ -81,6 +81,6 @@
     "cover": "media/2026-11-24-reel-tres-formas-de-desconectar/cover.jpg",
     "preview": "media/2026-11-24-reel-tres-formas-de-desconectar/preview.jpg",
     "duration": 22.3,
-    "size_mb": 3.84
+    "size_mb": 4.41
   }
 }
